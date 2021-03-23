@@ -1,6 +1,6 @@
-from voxpy.vox.viz.grid_view import grid_view
 import numpy as np
 from vox.utils import one_hot
+from .grid_view import grid_view
 from .seg_mask import seg_mask_cmp, seg_mask_cmp_for_all_classes
 
 
@@ -121,9 +121,13 @@ def cmp_cover_for_all_classes(vox, seg_vox, mask_vox, layout,
                               margin=0,
                               vox_channel=0,
                               ignore_class=[0]):
-    assert seg_vox.shape == mask_vox.shape, f''
-    assert vox.ndim == 4, f''
-    assert isinstance(margin, (int, tuple, list)), f''
+    assert seg_vox.shape == mask_vox.shape, \
+        f'The shape of seg_vox and the shape of mask_vox doesn\'t match, ' + \
+        f'seg_vox.shape={seg_vox.shape} and mask_vox.shape={mask_vox.shape}'
+    assert vox.ndim == 4, f'The dim of vox should be equal to 4, vox.ndim={vox.ndim}'
+    assert isinstance(margin, (int, tuple, list)), \
+        f'Type error, the type of margin is expected to be one of int, tuple or list, ' + \
+        f'but {type(margin)}, got.'
 
     if isinstance(margin, int):
         margin = [margin, margin]
@@ -140,15 +144,21 @@ def cmp_cover_for_all_classes(vox, seg_vox, mask_vox, layout,
                          channel=vox_channel, margin=margin)
     # repeat vox_grid
     # TODO optimize me
-    assert vox_grid.ndim == 2, f''
-    repeated_vox_grid = np.zeros((margin[0] * (num_classes_to_show + 1) + num_classes_to_show * vox_grid.shape[0],
-                                margin[1] * 2 + vox_grid[1]))
+    assert vox_grid.ndim == 2, \
+        f'The shape of vox_grid is expected to be equal to 2, ' + \
+        f'but vox_grid.ndim={vox_grid.ndim} got.'
+    repeated_vox_grid = np.zeros((margin[0] * (num_classes_to_show + 1) + \
+                                    num_classes_to_show * vox_grid.shape[0],
+                                  margin[1] * 2 + vox_grid.shape[1]))
     for i in range(num_classes_to_show):
         repeated_vox_grid[margin[0] * (i + 1) + i * vox_grid.shape[0]: \
                             margin[0] * (i + 1) + (i + 1) * vox_grid.shape[0],
-                          margin[1]: margin[1] + vox_grid[1]] = vox_grid
+                          margin[1]: margin[1] + vox_grid.shape[1]] = vox_grid
     repeated_vox_grid = np.expand_dims(repeated_vox_grid, axis=0)
 
-    assert repeated_vox_grid.shape[-2:] == cmp_rgb_mask.shape[-2:], f''
+    assert repeated_vox_grid.shape[-2:] == cmp_rgb_mask.shape[-2:], \
+        f'The spatial shape of repeated_vox_grid and cmp_rgb_mask doesn\'t match, ' + \
+        f'repeated_vox_grid.shape={repeated_vox_grid.shape} and ' + \
+        f'cmp_rgb_mask.shape={cmp_rgb_mask.shape}'
     covered_vox = repeated_vox_grid + cmp_rgb_mask
     return np.clip(covered_vox, 0, 255.0).astype(np.int)

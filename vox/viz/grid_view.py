@@ -34,6 +34,9 @@ def grid_view_for_all_channel(vox, layout, flatten_axis=-1, ignore_channels=[0],
         'Type error, the type of margin should be one of int, tuple or list, ' + \
         f'but {type(margin)} got.'
 
+    if isinstance(margin, int):
+        margin = [margin, margin]
+
     num_channels = vox.shape[0]
     num_show_channels = num_channels - len(ignore_channels)
     output = None

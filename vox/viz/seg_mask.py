@@ -4,8 +4,8 @@ from .grid_view import grid_view_for_all_channel
 
 
 def seg_mask_cmp(seg_grid, mask_grid, show_class, one_hoted=True, num_classes=None):
-    assert one_hoted is False and num_classes is None, \
-        f'When one_hoted is None, num_classes should be specific.'
+    assert one_hoted is True or num_classes is not None, \
+        f'When one_hoted is False, num_classes should be specific.'
 
     if not one_hoted:
         # mask_shape: (W, H)
@@ -61,7 +61,7 @@ def seg_mask_cmp_for_all_classes(vox_seg, vox_mask, layout,
 
     assert vox_mask.ndim == 4, \
         f'The shape of input vox should have 4 dim (C, X, Y, Z), ' + \
-        'but dim={vox_mask.ndim} got.'
+        f'but dim={vox_mask.ndim} got.'
 
     if isinstance(ignore_class, int):
         ignore_class = [ignore_class]
