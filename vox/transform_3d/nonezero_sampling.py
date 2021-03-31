@@ -35,14 +35,15 @@ def merge_bbox(*bboxs):
 
 
 def find_none_zero_bbox(mask):
-    assert mask.ndim == 4
+    return find_none_zero_bbox_single_channel(mask)
+    # assert mask.ndim == 4
 
-    C = mask.shape[0]
-    bboxs = []
-    for c in range(C):
-        mask_c = mask[c, :, :, :]
-        bboxs.append(find_none_zero_bbox_single_channel(mask_c))
-    return merge_bbox(*bboxs)
+    # C = mask.shape[0]
+    # bboxs = []
+    # for c in range(C):
+    #     mask_c = mask[c, :, :, :]
+    #     bboxs.append(find_none_zero_bbox_single_channel(mask_c))
+    # return merge_bbox(*bboxs)
 
 
 class NoneZeroSampling(Transformer):
@@ -55,11 +56,11 @@ class NoneZeroSampling(Transformer):
         inp_shape = inp.shape  # C * X * Y * Z
 
         x_start_available = (max(0, bbox[0][0] - self.shape[1]), \
-                             min(inp_shape[1] - self.shape[1], bbox[0][1]))
+                             min(inp_shape[1] - self.shape[1], bbox[0][1]) + 1)
         y_start_available = (max(0, bbox[1][0] - self.shape[2]), \
-                             min(inp_shape[2] - self.shape[2], bbox[1][1]))
+                             min(inp_shape[2] - self.shape[2], bbox[1][1]) + 1)
         z_start_available = (max(0, bbox[2][0] - self.shape[3]), \
-                             min(inp_shape[3] - self.shape[3], bbox[2][1]))
+                             min(inp_shape[3] - self.shape[3], bbox[2][1]) + 1)
 
         x_start = np.random.randint(*x_start_available)
         y_start = np.random.randint(*y_start_available)

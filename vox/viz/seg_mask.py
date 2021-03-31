@@ -1,5 +1,5 @@
 import numpy as np
-from vox.utils import one_hot
+from vox.utils import one_hot, threhold_seg
 from .grid_view import grid_view_for_all_channel
 
 

@@ -18,4 +18,4 @@ install: dep
 
 
 clean:
-	-rm -rf .eggs .tox build MANIFEST
+	-rm -rf .eggs .tox build MANIFEST ./**/.ipynb_checkpoints
