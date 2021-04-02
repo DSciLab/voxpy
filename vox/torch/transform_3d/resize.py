@@ -3,7 +3,7 @@ from .utils import affine_transform
 from vox._transform import Transformer
 
 
-class Resize(object):
+class Resize(Transformer):
     def __init__(self) -> None:
         super().__init__()
 
