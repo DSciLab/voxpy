@@ -3,7 +3,7 @@ from scipy.ndimage import affine_transform
 from vox._transform import Transformer
 
 
-class Resize(object):
+class Resize(Transformer):
     def __init__(self) -> None:
         super().__init__()
 
@@ -30,8 +30,8 @@ class Resize(object):
         if size is not None and not isinstance(size, (tuple, list)):
             size = (size, size)
         if scale is None:
-            scale = (width / size[0],
-                     height / size[1])
+            scale = (size[0] / width,
+                     size[1] / height)
         if size is None:
             size = (int(width * scale[0]),
                     int(height * scale[1]))

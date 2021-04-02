@@ -3,7 +3,7 @@ from scipy.ndimage import affine_transform
 from vox._transform import Transformer
 
 
-class Translate(object):
+class Translate(Transformer):
     OFFSET = 1.0e6
     def __init__(self) -> None:
         super().__init__()

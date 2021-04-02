@@ -3,7 +3,7 @@ from scipy.ndimage import affine_transform
 from vox._transform import Transformer
 
 
-class Rotate(object):
+class Rotate(Transformer):
     def __init__(self) -> None:
         super().__init__()
 
