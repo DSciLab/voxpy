@@ -41,7 +41,7 @@ class Translate(Transformer):
         mask = mask.unsqueeze(1)
         mask = affine_transform(mask, affine_matrix)
         mask = mask.squeeze(1)
-        return inp, mask
+        return inp, mask.round()
 
 
 class RandomTranslate(Transformer):

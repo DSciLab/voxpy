@@ -43,7 +43,7 @@ class Translate(Transformer):
                 inp_.append(affine_transform(inp[i], affine_matrix))
             inp = np.stack(inp_, axis=0)
         mask = affine_transform(mask, affine_matrix, order=0)
-        return inp, mask
+        return inp, mask.round()
 
 
 class RandomTranslate(Transformer):

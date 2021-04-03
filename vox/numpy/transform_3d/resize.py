@@ -23,9 +23,9 @@ class Resize(Transformer):
         assert scale is None or size is None, \
             'Ambiguous, scale is not None and size is not None.'
 
-        width = inp.shape[0]
-        height = inp.shape[1]
-        depth = inp.shape[2]
+        width = inp.shape[1]
+        height = inp.shape[2]
+        depth = inp.shape[3]
 
         if scale is not None and not isinstance(scale, (tuple, list)):
             scale = (scale, scale, scale)
@@ -46,10 +46,13 @@ class Resize(Transformer):
         else:
             inp_ = []
             for i in range(inp.shape[0]):
-                inp_.append(affine_transform(inp[i], affine_matrix, output_shape=size))
+                inp_.append(affine_transform(inp[i], affine_matrix,
+                                             output_shape=size))
             inp = np.stack(inp_, axis=0)
-        mask = affine_transform(mask, affine_matrix, order=0, output_shape=size)
-        return inp, mask
+        
+        mask = affine_transform(mask, affine_matrix, order=0,
+                                output_shape=size)
+        return inp, mask.round()
 
 
 class RandomResize(Transformer):

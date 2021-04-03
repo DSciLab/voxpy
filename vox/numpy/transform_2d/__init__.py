@@ -9,6 +9,7 @@ from .flip import RandomFlip
 from .resize import RandomResize
 from .rotate import RandomRotate
 from .translate import RandomTranslate
+from .gaussian_blur import RandomGaussianBlur
 
 from vox._transform import Transformer, \
                            LinearNormalize, \
