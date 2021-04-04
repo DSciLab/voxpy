@@ -1,5 +1,5 @@
 import torch
-from vox._transform import Transformer
+from vox.torch._transform import Transformer
 
 
 def find_none_zero_bbox_single_channel(mask):

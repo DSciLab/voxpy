@@ -7,7 +7,7 @@ class Normalize(Transformer):
 
 
 class LinearNormalize(Normalize):
-    def __init__(self) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__()
 
     def __call__(self, inp, gt):
@@ -18,15 +18,20 @@ class LinearNormalize(Normalize):
 
 
 class CentralNormalize(Normalize):
-    def __init__(self, mean, std) -> None:
+    ESP = 1.0e-8
+    def __init__(self, mean=None, std=None) -> None:
         super().__init__()
-        if std == 0:
-            raise ValueError('std should not be 0')
+        assert (mean is None and std is None) or \
+               (mean is not None and std is not None), f'mean={mean} and std={std}'
         self.mean = mean
         self.std = std
 
     def __call__(self, inp, gt):
-        return (inp - self.mean) / self.std, gt
+        if self.mean is None and self.std is None:
+            self.mean = np.mean(inp)
+            self.std = np.std(inp)
+
+        return (inp - self.mean) / (self.std + self.ESP), gt
 
 
 class GeneralNormalize(Normalize):
@@ -36,7 +41,10 @@ class GeneralNormalize(Normalize):
         if norm_opt == 'LinearNormalize':
             self.norm = LinearNormalize()
         elif norm_opt == 'CentralNormalize':
-            self.norm = CentralNormalize(opt.mean, opt.std)
+            if opt.get('unified_stat', False):
+                self.norm = CentralNormalize()
+            else:
+                self.norm = CentralNormalize(opt.mean, opt.std)
         else:
             raise RuntimeError(f'Unrecognized norm function ({opt.norm}).')
 

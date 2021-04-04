@@ -1,5 +1,5 @@
 import numpy as np
-from vox._transform import Transformer
+from vox.numpy._transform import Transformer
 
 
 def find_none_zero_bbox_single_channel(mask):

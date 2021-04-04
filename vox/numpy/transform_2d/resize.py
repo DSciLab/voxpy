@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.ndimage import affine_transform
-from vox._transform import Transformer
+from vox.numpy._transform import Transformer
 
 
 class Resize(Transformer):
@@ -22,8 +22,8 @@ class Resize(Transformer):
         assert scale is None or size is None, \
             'Ambiguous, scale is not None and size is not None.'
 
-        width = inp.shape[1]
-        height = inp.shape[2]
+        width = mask.shape[0]
+        height = mask.shape[1]
 
         if scale is not None and not isinstance(scale, (tuple, list)):
             scale = (scale, scale)

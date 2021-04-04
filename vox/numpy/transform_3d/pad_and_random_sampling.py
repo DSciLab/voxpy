@@ -1,4 +1,4 @@
-from vox._transform import PadAndRandomSampling as _PadAndRandomSampling
+from vox.numpy._transform import PadAndRandomSampling as _PadAndRandomSampling
 from .zero_padding import ZeroPad
 from .random_sampling import RandomSampling
 

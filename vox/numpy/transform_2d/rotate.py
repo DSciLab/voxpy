@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.ndimage import affine_transform
-from vox._transform import Transformer
+from vox.numpy._transform import Transformer
 
 
 class Rotate(Transformer):

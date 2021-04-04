@@ -1,4 +1,4 @@
-from vox._transform import Transformer
+from vox.numpy._transform import Transformer
 from .pad_and_nonezero_sampling import PadAndNoneZeroSampling
 from .pad_and_random_sampling import PadAndRandomSampling
 

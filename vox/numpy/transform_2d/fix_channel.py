@@ -1,5 +1,5 @@
 import numpy as np
-from vox._transform import Transformer
+from vox.numpy._transform import Transformer
 
 
 class FixChannels(Transformer):

@@ -1,6 +1,6 @@
 import torch
 from .utils import affine_transform
-from vox._transform import Transformer
+from vox.torch._transform import Transformer
 
 
 class Resize(Transformer):

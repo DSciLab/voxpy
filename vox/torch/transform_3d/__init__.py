@@ -10,7 +10,7 @@ from .resize import RandomResize
 from .rotate import RandomRotate
 from .translate import RandomTranslate
 
-from vox._transform import Transformer, \
+from vox.torch._transform import Transformer, \
                            LinearNormalize, \
                            CentralNormalize, \
                            GeneralNormalize, \
