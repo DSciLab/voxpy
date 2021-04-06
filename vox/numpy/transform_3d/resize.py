@@ -67,3 +67,18 @@ class RandomResize(Transformer):
     def __call__(self, inp, mask):
         scale = np.random.rand() * (self.r_max - self.r_min) + self.r_min
         return self.resizer(inp, mask, scale=scale)
+
+
+class MaxSize(Transformer):
+    def __init__(self, size) -> None:
+        super().__init__()
+        assert isinstance(size, (tuple, list)) and len(size) == 3
+        self.size = size
+        self.resizer = Resize()
+
+    def __call__(self, inp, mask):
+        mask_shape = mask.shape
+        if np.prod(mask_shape) > np.prod(self.size):
+            return self.resizer(inp, mask, size=self.size)
+        else:
+            return inp, mask
