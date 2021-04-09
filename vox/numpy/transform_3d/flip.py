@@ -54,11 +54,20 @@ class FlipZ(Transformer):
 
 
 class RandomFlip(Transformer):
-    def __init__(self) -> None:
+    def __init__(self, threhold=0.5, decay=None) -> None:
         super().__init__()
+        self.decay = decay
+        self.threhold = threhold
         self.flip_x = FlipX()
         self.flip_y = FlipY()
         self.flip_z = FlipZ()
+
+    def update_param(self, verbose=False, *args, **kwargs):
+        if self.decay is not None:
+            self.threhold += (1 - self.threhold) * (1 - self.decay)
+            if verbose:
+                print(f'Update {self.__class__.__name__} parameter to '
+                      f'{self.threhold}')
 
     def __call__(self, inp, mask):
         rand = np.random.rand(3)

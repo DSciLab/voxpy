@@ -28,10 +28,13 @@ class CentralNormalize(Normalize):
 
     def __call__(self, inp, gt):
         if self.mean is None and self.std is None:
-            self.mean = np.mean(inp)
-            self.std = np.std(inp)
+            mean = np.mean(inp)
+            std = np.std(inp)
+        else:
+            mean = self.mean
+            std = self.std
 
-        return (inp - self.mean) / (self.std + self.ESP), gt
+        return (inp - mean) / (std + self.ESP), gt
 
 
 class GeneralNormalize(Normalize):

@@ -4,3 +4,6 @@ class Transformer(object):
 
     def __call__(self, inp):
         raise NotImplementedError
+
+    def update_param(self, *args, **kwargs):
+        raise NotImplementedError

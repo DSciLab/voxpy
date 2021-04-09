@@ -56,13 +56,22 @@ class Resize(Transformer):
 
 
 class RandomResize(Transformer):
-    def __init__(self, r_min, r_max) -> None:
+    def __init__(self, r_min, r_max, decay=None) -> None:
         super().__init__()
         assert r_max > r_min, \
             f'r_max <= r_min, r_max={r_max} and r_min={r_min}'
         self.r_max = r_max
         self.r_min = r_min
+        self.decay = decay
         self.resizer = Resize()
+
+    def update_param(self, verbose=False, *args, **kwargs):
+        if self.decay is not None:
+            self.r_max = self.decay * self.r_max + (1 - self.decay)
+            self.r_min = self.decay * self.r_min + (1 - self.decay)
+            if verbose:
+                print(f'Update {self.__class__.__name__} parameter to '
+                      f'{self.r_min}~{self.r_max}')
 
     def __call__(self, inp, mask):
         scale = np.random.rand() * (self.r_max - self.r_min) + self.r_min

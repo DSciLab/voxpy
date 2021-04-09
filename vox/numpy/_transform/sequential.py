@@ -22,6 +22,13 @@ class Sequantial(Transformer):
                 f' {transform} not a instance of Transform.')
         self.transform_lst.append(transform)
 
+    def update_param(self, *args, **kwargs):
+        for transformer in self.transform_lst:
+            try:
+                transformer.update_param(*args, **kwargs)
+            except NotImplementedError:
+                pass
+
     def __call__(self, inp, mask=None):
         for transform in self.transform_lst:
             if isinstance(transform, (ToNumpyArray, ToTensor)):

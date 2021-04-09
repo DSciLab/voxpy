@@ -34,8 +34,8 @@ class Translate(Transformer):
             size = (size, size, size)
         if size is None:
             size = (width * scale[0],
-                     height * scale[1],
-                     depth * scale[2])
+                    height * scale[1],
+                    depth * scale[2])
 
         affine_matrix = self.transform_matric(size)
         if inp.ndim == 3:
@@ -50,14 +50,23 @@ class Translate(Transformer):
 
 
 class RandomTranslate(Transformer):
-    def __init__(self, r_min, r_max, depth_translate=False) -> None:
+    def __init__(self, r_min, r_max, depth_translate=False, decay=None) -> None:
         super().__init__()
         assert r_max > r_min, \
             f'r_max <= r_min, r_max={r_max} and r_min={r_min}'
         self.r_max = r_max
         self.r_min = r_min
+        self.decay = decay
         self.depth_translate = depth_translate
         self.translator = Translate()
+
+    def update_param(self, verbose=False, *args, **kwargs):
+        if self.decay is not None:
+            self.r_max *= self.decay
+            self.r_min *= self.decay
+            if verbose:
+                print(f'Update {self.__class__.__name__} parameter to '
+                      f'{self.r_min}~{self.r_max}')
 
     def __call__(self, inp, mask):
         scale = np.random.rand() * (self.r_max - self.r_min) + self.r_min
