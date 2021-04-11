@@ -4,6 +4,7 @@ from vox.numpy._transform import Transformer
 
 def find_none_zero_bbox_single_channel(mask):
     x, y, z = np.where(mask > 0)
+
     x_low = np.min(x)
     x_high = np.max(x)
 

@@ -15,25 +15,25 @@ from .equalization  import HistEqual
 from .gaussian_blur import GaussianBlur
 
 
-__all__ = ['IdentityOps',
-           'ResizeOps',
-           'HistEqualOps',
-           'GaussianBlurOps',
-           'NoiseOps',
-           'FlipZOps',
-           'FlipYOps',
-           'FlipXOps',
-           'TranslateXOps',
-           'TranslateYOps',
-           'ShearXOps',
-           'ShearYOps',
-           'RotateOps',
-           'HigherContrastOps',
-           'LowerContrastOps',
-           'SharpOps']
+__all__ = ['IdentityOp',
+           'ResizeOp',
+           'HistEqualOp',
+           'GaussianBlurOp',
+           'NoiseOp',
+           'FlipZOp',
+           'FlipYOp',
+           'FlipXOp',
+           'TranslateXOp',
+           'TranslateYOp',
+           'ShearXOp',
+           'ShearYOp',
+           'RotateOp',
+           'HigherContrastOp',
+           'LowerContrastOp',
+           'SharpOp']
 
 
-class TransformerOps(object):
+class TransformerOp(object):
     def __init__(self) -> None:
         super().__init__()
 
@@ -41,7 +41,7 @@ class TransformerOps(object):
         raise NotImplementedError
 
 
-class IdentityOps(TransformerOps):
+class IdentityOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = Identity()
@@ -50,7 +50,7 @@ class IdentityOps(TransformerOps):
         return self.transformer(inp, mask)
 
 
-class ResizeOps(TransformerOps):
+class ResizeOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = Resize()
@@ -59,7 +59,7 @@ class ResizeOps(TransformerOps):
         return self.transformer(inp, mask, scale=scale)
 
 
-class HistEqualOps(TransformerOps):
+class HistEqualOp(TransformerOp):
     def __init__(self, opt) -> None:
         super().__init__()
         self.transformer = HistEqual(opt.max_val)
@@ -68,7 +68,7 @@ class HistEqualOps(TransformerOps):
         return self.transformer(inp, mask, alpha=scale)
 
 
-class GaussianBlurOps(TransformerOps):
+class GaussianBlurOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = GaussianBlur()
@@ -77,7 +77,7 @@ class GaussianBlurOps(TransformerOps):
         return self.transformer(inp, mask, sigma=scale)
 
 
-class NoiseOps(TransformerOps):
+class NoiseOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = Noise()
@@ -86,7 +86,7 @@ class NoiseOps(TransformerOps):
         return self.transformer(inp, mask, std_scale=scale)
 
 
-class FlipZOps(TransformerOps):
+class FlipZOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = FlipZ()
@@ -95,7 +95,7 @@ class FlipZOps(TransformerOps):
         return self.transformer(inp, mask)
 
 
-class FlipYOps(TransformerOps):
+class FlipYOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = FlipY()
@@ -104,7 +104,7 @@ class FlipYOps(TransformerOps):
         return self.transformer(inp, mask)
 
 
-class FlipXOps(TransformerOps):
+class FlipXOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = FlipX()
@@ -113,7 +113,7 @@ class FlipXOps(TransformerOps):
         return self.transformer(inp, mask)
 
 
-class TranslateXOps(TransformerOps):
+class TranslateXOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = TranslateX()
@@ -122,7 +122,7 @@ class TranslateXOps(TransformerOps):
         return self.transformer(inp, mask, scale=scale)
 
 
-class TranslateYOps(TransformerOps):
+class TranslateYOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = TranslateY()
@@ -131,7 +131,7 @@ class TranslateYOps(TransformerOps):
         return self.transformer(inp, mask, scale=scale)
 
 
-class RotateOps(TransformerOps):
+class RotateOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = Rotate()
@@ -140,7 +140,7 @@ class RotateOps(TransformerOps):
         return self.transformer(inp, mask, theta=scale)
 
 
-class ShearXOps(TransformerOps):
+class ShearXOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = ShearX()
@@ -149,7 +149,7 @@ class ShearXOps(TransformerOps):
         return self.transformer(inp, mask, theta=scale)
 
 
-class ShearYOps(TransformerOps):
+class ShearYOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.transformer = ShearY()
@@ -158,7 +158,7 @@ class ShearYOps(TransformerOps):
         return self.transformer(inp, mask, theta=scale)
 
 
-class HigherContrastOps(TransformerOps):
+class HigherContrastOp(TransformerOp):
     def __init__(self, opt) -> None:
         super().__init__()
         self.transformer = HigherContrast(opt.max_val)
@@ -167,7 +167,7 @@ class HigherContrastOps(TransformerOps):
         return self.transformer(inp, mask, alpha=scale)
 
 
-class LowerContrastOps(TransformerOps):
+class LowerContrastOp(TransformerOp):
     def __init__(self, opt) -> None:
         super().__init__()
         self.transformer = LowerContrast(opt.max_val)
@@ -176,7 +176,7 @@ class LowerContrastOps(TransformerOps):
         return self.transformer(inp, mask, alpha=scale)
 
 
-class SharpOps(TransformerOps):
+class SharpOp(TransformerOp):
     def __init__(self, opt) -> None:
         super().__init__()
         denoise_sigma, sharp_sigma = tuple(opt.get('aug_sharp_sigma', [0.1, 0.4]))
@@ -197,37 +197,38 @@ class RandAugment(Transformer):
         self.M = opt.rand_aug_M
         self.aug_ops = [
             #   OP       minval      maxval
-            (IdentityOps(opt), None, None),
-            (ResizeOps(opt), 1.0, 0.7),
-            (ResizeOps(opt), 1.0, 1.3),
-            (HistEqualOps(opt), 0.0, 0.012),
-            (GaussianBlurOps(opt), 0, 0.6),
-            (NoiseOps(opt), 0, 0.1),
-            (FlipZOps(opt), None, None),
-            (FlipYOps(opt), None, None),
-            (FlipXOps(opt), None, None),
-            (TranslateXOps(opt), 0.0, 0.2),
-            (TranslateXOps(opt), 0.0, -0.2),
-            (TranslateYOps(opt), 0.0, 0.2),
-            (TranslateYOps(opt), 0.0, -0.2),
-            (ShearXOps(opt), 0.0, 0.3),
-            (ShearXOps(opt), 0.0, -0.3),
-            (ShearYOps(opt), 0.0, 0.3),
-            (ShearYOps(opt), 0.0, -0.3),
-            (RotateOps(opt), 0.0, np.pi/6),
-            (RotateOps(opt), 0.0, -np.pi/6),
-            (HigherContrastOps(opt), 0.0, 2.3),
-            (LowerContrastOps(opt), 1.0, 1.3),
-            (SharpOps(opt), 0.0, 2.5)]
+            (IdentityOp(opt), None, None),
+            (ResizeOp(opt), 1.0, 0.7),
+            (ResizeOp(opt), 1.0, 1.3),
+            (HistEqualOp(opt), 0.0, 0.012),
+            (GaussianBlurOp(opt), 0, 0.6),
+            (NoiseOp(opt), 0, 0.1),
+            (FlipZOp(opt), None, None),
+            (FlipYOp(opt), None, None),
+            (FlipXOp(opt), None, None),
+            (TranslateXOp(opt), 0.0, 0.1),
+            (TranslateXOp(opt), 0.0, -0.1),
+            (TranslateYOp(opt), 0.0, 0.1),
+            (TranslateYOp(opt), 0.0, -0.1),
+            (ShearXOp(opt), 0.0, 0.2),
+            (ShearXOp(opt), 0.0, -0.2),
+            (ShearYOp(opt), 0.0, 0.2),
+            (ShearYOp(opt), 0.0, -0.2),
+            (RotateOp(opt), 0.0, np.pi/6),
+            (RotateOp(opt), 0.0, -np.pi/6),
+            (HigherContrastOp(opt), 0.0, 2.3),
+            (LowerContrastOp(opt), 1.0, 1.3),
+            (SharpOp(opt), 0.0, 2.5)]
 
     def __call__(self, inp, mask):
-        ops = random.choices(self.aug_ops, k=self.N)
+        ops = random.sample(self.aug_ops, self.N)
+        # print(ops)
         for op, minval, maxval in ops:
             if minval is not None and maxval is not None:
                 val = float(self.M) * (maxval - minval) + minval
             else:
                 val = None
-            # print(op.__class__.__name__, '<<',inp.min())
+            # print(op.__class__.__name__, '<<', inp.min(), inp.max())
             inp, mask = op(inp, mask, val)
-            # print(op.__class__.__name__, '>>', inp.min())
+            # print(op.__class__.__name__, '>>', inp.min(), inp.max())
         return inp, mask
