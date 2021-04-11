@@ -42,11 +42,15 @@ class Resize(Transformer):
 
         affine_matrix = self.transform_matric(scale)
         if inp.ndim == 3:
-            inp = affine_transform(inp, affine_matrix, output_shape=size)
+            inp = affine_transform(inp, affine_matrix,
+                                   order=1,
+                                   output_shape=size)
         else:
             inp_ = []
             for i in range(inp.shape[0]):
+                # TODO fix me.
                 inp_.append(affine_transform(inp[i], affine_matrix,
+                                             order=1,
                                              output_shape=size))
             inp = np.stack(inp_, axis=0)
         

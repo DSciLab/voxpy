@@ -37,11 +37,11 @@ class Rotate(Transformer):
         affine_matrix = self.transform_matric(theta, width, height)
 
         if inp.ndim == 3:
-            inp = affine_transform(inp, affine_matrix)
+            inp = affine_transform(inp, affine_matrix, order=1)
         else:
             inp_ = []
             for i in range(inp.shape[0]):
-                inp_.append(affine_transform(inp[i], affine_matrix))
+                inp_.append(affine_transform(inp[i], affine_matrix, order=1))
             inp = np.stack(inp_, axis=0)
 
         mask = affine_transform(mask, affine_matrix, order=0)

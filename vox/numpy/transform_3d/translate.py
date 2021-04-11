@@ -11,27 +11,29 @@ class Translate(Transformer):
     def transform_matric(self, size):
         assert len(size) == 3, f'len(sclae) = {len(size)} != 3'
         translation_axis_matrix = np.array(
-            [[1.,     0.,     0.,     size[0]],
-             [0.,     1.,     0.,     size[1]],
-             [0.,     0.,     1.,     size[2]],
-             [0.,     0.,     0.,           1.]])
+            [[1., 0., 0., size[0]],
+             [0., 1., 0., size[1]],
+             [0., 0., 1., size[2]],
+             [0., 0., 0.,      1.]])
 
         return translation_axis_matrix
 
-    def __call__(self, inp, mask, scale=None, size=None):
-        assert scale is not None or size is not None, \
-            'Scale is None and size is None.'
-        assert scale is None or size is None, \
-            'Ambiguous, scale is not None and size is not None.'
+    def translate(self, inp, mask, scale=None, size=None):
+        if scale is not None:
+            assert isinstance(scale, (tuple, list)) and len(scale) == 3, \
+                f'The type of scale is not tuple or list, or the length ' + \
+                f'is not equal to 3, type(scale)={type(scale)} ' + \
+                f'and len(scale)={len(scale)}.'
+        if size is not None:
+            assert isinstance(size, (tuple, list)) and len(size) == 3, \
+                f'The type of size is not tuple or list, or the length ' + \
+                f'is not equal to 3, type(size)={type(size)} ' + \
+                f'and len(size)={len(size)}.'
 
         width = inp.shape[0]
         height = inp.shape[1]
         depth = inp.shape[2]
 
-        if scale is not None and not isinstance(scale, (tuple, list)):
-            scale = (scale, scale, scale)
-        if size is not None and not isinstance(size, (tuple, list)):
-            size = (size, size, size)
         if size is None:
             size = (width * scale[0],
                     height * scale[1],
@@ -39,14 +41,65 @@ class Translate(Transformer):
 
         affine_matrix = self.transform_matric(size)
         if inp.ndim == 3:
-            inp = affine_transform(inp, affine_matrix)
+            inp = affine_transform(inp, affine_matrix, order=1)
         else:
             inp_ = []
             for i in range(inp.shape[0]):
-                inp_.append(affine_transform(inp[i], affine_matrix))
+                inp_.append(affine_transform(inp[i], affine_matrix, order=1))
             inp = np.stack(inp_, axis=0)
         mask = affine_transform(mask, affine_matrix, order=0)
         return inp, mask.round()
+
+
+class TranslateX(Translate):
+    def __call__(self, inp, mask, scale=None, size=None):
+        assert scale is not None or size is not None, \
+            'Scale is None and size is None.'
+        assert scale is None or size is None, \
+            'Ambiguous, scale is not None and size is not None.'
+        if scale is not None:
+            assert isinstance(scale, (int, float)), \
+                f'The type of scale should be int or float.'
+            scale = (scale, 0, 0)
+        if size is not None:
+            assert isinstance(size, (int, float)), \
+                f'The type of size should be int or float.'
+            size = (size, 0, 0)
+
+        return self.translate(inp, mask, scale, size)
+
+
+class TranslateY(Translate):
+    def __call__(self, inp, mask, scale=None, size=None):
+        assert scale is not None or size is not None, \
+            'Scale is None and size is None.'
+        assert scale is None or size is None, \
+            'Ambiguous, scale is not None and size is not None.'
+        if scale is not None:
+            assert isinstance(scale, (int, float)), \
+                f'The type of scale should be int or float.'
+            scale = (0, scale, 0)
+        if size is not None:
+            assert isinstance(size, (int, float)), \
+                f'The type of size should be int or float.'
+            size = (0, size, 0)
+
+        return self.translate(inp, mask, scale)
+
+
+class TranslateXYZ(Translate):
+    def __call__(self, inp, mask, scale=None, size=None):
+        assert scale is not None or size is not None, \
+            'Scale is None and size is None.'
+        assert scale is None or size is None, \
+            'Ambiguous, scale is not None and size is not None.'
+
+        if scale is not None and not isinstance(scale, (tuple, list)):
+            scale = (scale, scale, scale)
+        if size is not None and not isinstance(size, (tuple, list)):
+            size = (size, size, size)
+
+        return self.translate(inp, mask, scale)
 
 
 class RandomTranslate(Transformer):
