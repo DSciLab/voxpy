@@ -78,9 +78,9 @@ class RandomShear(Transformer):
     def __call__(self, inp, mask):
         rand = np.random.rand(2)
         if rand[0] > self.threhold:
-            inp, mask = self.shear_x(inp, mask)
+            inp, mask = self.rand_shear_x(inp, mask)
 
         if rand[1] > self.threhold:
-            inp, mask = self.shear_y(inp, mask)
+            inp, mask = self.rand_shear_y(inp, mask)
 
         return inp, mask

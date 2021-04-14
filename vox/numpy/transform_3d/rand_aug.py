@@ -8,6 +8,7 @@ from .shear import ShearX, ShearY
 from .rotate import Rotate
 from .translate import TranslateX, TranslateY
 from .flip import FlipX, FlipY, FlipZ
+from .squeeze import SqueezeX, SqueezeY, SqueezeZ
 from .noise import Noise
 from .resize import Resize
 from .identity import Identity
@@ -16,10 +17,13 @@ from .gaussian_blur import GaussianBlur
 
 
 __all__ = ['IdentityOp',
-           'ResizeOp',
            'HistEqualOp',
            'GaussianBlurOp',
            'NoiseOp',
+           'SharpOp',
+           'HigherContrastOp',
+           'LowerContrastOp',
+           'ResizeOp',
            'FlipZOp',
            'FlipYOp',
            'FlipXOp',
@@ -27,10 +31,10 @@ __all__ = ['IdentityOp',
            'TranslateYOp',
            'ShearXOp',
            'ShearYOp',
-           'RotateOp',
-           'HigherContrastOp',
-           'LowerContrastOp',
-           'SharpOp']
+           'SqueezeXOp',
+           'SqueezeYOp',
+           'SqueezeZOp',
+           'RotateOp']
 
 
 class TransformerOp(object):
@@ -111,6 +115,33 @@ class FlipXOp(TransformerOp):
 
     def __call__(self, inp, mask, *args, **kwargs):
         return self.transformer(inp, mask)
+
+
+class SqueezeXOp(TransformerOp):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__()
+        self.transformer = SqueezeX()
+
+    def __call__(self, inp, mask, scale):
+        return self.transformer(inp, mask, scale)
+
+
+class SqueezeYOp(TransformerOp):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__()
+        self.transformer = SqueezeY()
+
+    def __call__(self, inp, mask, scale):
+        return self.transformer(inp, mask, scale)
+
+
+class SqueezeZOp(TransformerOp):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__()
+        self.transformer = SqueezeZ()
+
+    def __call__(self, inp, mask, scale):
+        return self.transformer(inp, mask, scale)
 
 
 class TranslateXOp(TransformerOp):
@@ -195,34 +226,58 @@ class RandAugment(Transformer):
         super().__init__()
         self.N = opt.rand_aug_N
         self.M = opt.rand_aug_M
-        self.aug_ops = [
+
+        assert isinstance(self.N, (tuple, list)) and len(self.N) == 2, \
+            f'The type of rand_aug_N should be list or tuple, ' +\
+            f'and the length of rand_aug_N should be equal to 2, ' +\
+            f'type(rand_aug_N)={type(self.N)} len(rand_aug_N)=' +\
+            f'{len(self.N) if isinstance(self.N, (tuple, list)) else None}'
+
+        self.geometry_aug_ops = [
             #   OP       minval      maxval
             (IdentityOp(opt), None, None),
-            (ResizeOp(opt), 1.0, 0.7),
-            (ResizeOp(opt), 1.0, 1.3),
             (HistEqualOp(opt), 0.0, 0.012),
             (GaussianBlurOp(opt), 0, 0.6),
             (NoiseOp(opt), 0, 0.1),
+            (SharpOp(opt), 0.0, 2.5),
+
+            (HigherContrastOp(opt), 0.0, 2.3),
+            (LowerContrastOp(opt), 1.0, 1.3)]
+
+        self.color_aug_ops = [
+            #   OP       minval      maxval
+            (ResizeOp(opt), 1.0, 0.7),
+            (ResizeOp(opt), 1.0, 1.3),
+
             (FlipZOp(opt), None, None),
             (FlipYOp(opt), None, None),
             (FlipXOp(opt), None, None),
+
             (TranslateXOp(opt), 0.0, 0.1),
             (TranslateXOp(opt), 0.0, -0.1),
             (TranslateYOp(opt), 0.0, 0.1),
             (TranslateYOp(opt), 0.0, -0.1),
+
             (ShearXOp(opt), 0.0, 0.2),
             (ShearXOp(opt), 0.0, -0.2),
             (ShearYOp(opt), 0.0, 0.2),
             (ShearYOp(opt), 0.0, -0.2),
-            (RotateOp(opt), 0.0, np.pi/6),
-            (RotateOp(opt), 0.0, -np.pi/6),
-            (HigherContrastOp(opt), 0.0, 2.3),
-            (LowerContrastOp(opt), 1.0, 1.3),
-            (SharpOp(opt), 0.0, 2.5)]
+
+            (SqueezeXOp(opt), 1.0, 0.8),
+            (SqueezeXOp(opt), 1.0, 1.2),
+            (SqueezeYOp(opt), 1.0, 0.8),
+            (SqueezeYOp(opt), 1.0, 1.2),
+            (SqueezeZOp(opt), 1.0, 0.8),
+            (SqueezeZOp(opt), 1.0, 1.2),
+
+            (RotateOp(opt), 0.0, np.pi/8),
+            (RotateOp(opt), 0.0, -np.pi/8)]
 
     def __call__(self, inp, mask):
-        ops = random.sample(self.aug_ops, self.N)
-        # print(ops)
+        color_ops = random.sample(self.color_aug_ops, self.N[0])
+        geometry_ops = random.sample(self.geometry_aug_ops, self.N[1])
+        ops = color_ops + geometry_ops
+
         for op, minval, maxval in ops:
             if minval is not None and maxval is not None:
                 val = float(self.M) * (maxval - minval) + minval

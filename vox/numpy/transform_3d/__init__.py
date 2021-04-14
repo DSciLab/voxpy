@@ -11,6 +11,7 @@ from .rotate import RandomRotate
 from .translate import RandomTranslate
 from .gaussian_blur import RandomGaussianBlur
 from .noise import RandomNoise
+from .squeeze import RandomSqueeze
 from .rand_aug import RandAugment
 
 from vox.numpy._transform import Transformer, \
