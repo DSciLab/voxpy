@@ -35,7 +35,7 @@ class GeneralNormRescale255(Rescale):
         norm_opt = opt.get('norm', 'LinearNormalize')
         if norm_opt == 'LinearNormalize':
             self.rescale = LinearNormRescale255()
-        elif norm_opt == 'CentralNormalize':
+        elif 'Central' in norm_opt:
             self.rescale = CentralNormRescale255(opt.mean, opt.std)
         else:
             raise RuntimeError(f'Unrecognized norm function ({opt.norm}).')

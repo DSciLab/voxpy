@@ -1,6 +1,7 @@
 from .base import Transformer
 from .to_tensor import ToTensor
 from .to_numpy import ToNumpyArray
+from .normalize import Normalize
 
 
 class Sequantial(Transformer):
@@ -29,7 +30,7 @@ class Sequantial(Transformer):
             except NotImplementedError:
                 pass
 
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp, mask=None, vendor_id=None):
         for transform in self.transform_lst:
             if isinstance(transform, (ToNumpyArray, ToTensor)):
                 inp = transform(inp)
@@ -37,7 +38,10 @@ class Sequantial(Transformer):
                     mask = transform(mask, mask=True)
             else:
                 try:
-                    inp, mask = transform(inp, mask)
+                    if isinstance(transform, Normalize):
+                        inp, mask = transform(inp, mask, vendor_id=vendor_id)
+                    else:
+                        inp, mask = transform(inp, mask)
                 except ValueError as e:
                     print(transform.__class__.__name__)
                     raise e
