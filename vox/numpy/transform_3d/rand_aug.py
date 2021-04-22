@@ -275,8 +275,8 @@ class RandAugment(Transformer):
 
             (PowerBrightnessOp(opt), 1.0, 0.7),
             (PowerBrightnessOp(opt), 1.0, 1.3),
-            (SinBrightnessOp(opt), 0.96, 1.0),
-            (ArcSinBrightnessOp(opt), 0.96, 1.0),
+            # (SinBrightnessOp(opt), 0.96, 1.0),
+            # (ArcSinBrightnessOp(opt), 0.96, 1.0),
 
             (HigherContrastOp(opt), 0.0, 2.3),
             (LowerContrastOp(opt), 1.0, 1.3)]

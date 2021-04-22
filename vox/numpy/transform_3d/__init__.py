@@ -1,4 +1,4 @@
-from .zero_padding import ZeroPad
+from .padding import ZeroPad
 from .random_sampling import RandomSampling
 from .nonezero_sampling import NoneZeroSampling
 from .fix_channel import FixChannels

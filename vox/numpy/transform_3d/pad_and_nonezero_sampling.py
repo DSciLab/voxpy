@@ -1,5 +1,5 @@
 from vox.numpy._transform import PadAndNoneZeroSampling as _PadAndNoneZeroSampling
-from .zero_padding import ZeroPad
+from .padding import ZeroPad
 from .nonezero_sampling import NoneZeroSampling
 
 

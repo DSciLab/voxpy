@@ -92,12 +92,14 @@ def make_grid(vox, layout, flatten_axis=-1, margin=0):
                        layout[1] * size[1] + margin[1] * (layout[1] + 1)))
 
     k = 0
-    skip_frame = min(vox.shape[0] // num_sub_figure, 1)
+    skip_frame = max(vox.shape[0] // num_sub_figure, 1)
 
     for i in range(layout[0]):
         for j in range(layout[1]):
-            output[i * size[0] + margin[0] * (i + 1): (i + 1) * size[0] + margin[0] * (i + 1), \
-                   j * size[1] + margin[1] * (j + 1): (j + 1) * size[1] + margin[1] * (j + 1)] = vox[k]
+            output[i * size[0] + margin[0] * (i + 1): \
+                    (i + 1) * size[0] + margin[0] * (i + 1), \
+                   j * size[1] + margin[1] * (j + 1): \
+                    (j + 1) * size[1] + margin[1] * (j + 1)] = vox[k]
             k += skip_frame
             if k >= vox.shape[0]:
                 break
