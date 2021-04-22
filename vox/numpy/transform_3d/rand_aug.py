@@ -14,11 +14,16 @@ from .resize import Resize
 from .identity import Identity
 from .equalization  import HistEqual
 from .gaussian_blur import GaussianBlur
+from .power_brightness import PowerBrightness
+from .sin_brightness import SinBrightness, ArcSinBrightness
 
 
 __all__ = ['IdentityOp',
            'HistEqualOp',
            'GaussianBlurOp',
+           'PowerBrightnessOp',
+           'SinBrightnessOp',
+           'ArcSinBrightnessOp',
            'NoiseOp',
            'SharpOp',
            'HigherContrastOp',
@@ -207,6 +212,33 @@ class LowerContrastOp(TransformerOp):
         return self.transformer(inp, mask, alpha=scale)
 
 
+class PowerBrightnessOp(TransformerOp):
+    def __init__(self, opt) -> None:
+        super().__init__()
+        self.transformer = PowerBrightness()
+
+    def __call__(self, inp, mask, scale):
+        return self.transformer(inp, mask, power=scale)
+
+
+class SinBrightnessOp(TransformerOp):
+    def __init__(self, opt) -> None:
+        super().__init__()
+        self.transformer = SinBrightness()
+
+    def __call__(self, inp, mask, scale):
+        return self.transformer(inp, mask, scale=scale)
+
+
+class ArcSinBrightnessOp(TransformerOp):
+    def __init__(self, opt) -> None:
+        super().__init__()
+        self.transformer = ArcSinBrightness()
+
+    def __call__(self, inp, mask, scale):
+        return self.transformer(inp, mask, scale=scale)
+
+
 class SharpOp(TransformerOp):
     def __init__(self, opt) -> None:
         super().__init__()
@@ -237,9 +269,14 @@ class RandAugment(Transformer):
             #   OP       minval      maxval
             (IdentityOp(opt), None, None),
             (HistEqualOp(opt), 0.0, 0.012),
-            (GaussianBlurOp(opt), 0, 0.6),
-            (NoiseOp(opt), 0, 0.1),
+            (GaussianBlurOp(opt), 0.0, 0.6),
+            (NoiseOp(opt), 0.0, 0.1),
             (SharpOp(opt), 0.0, 2.5),
+
+            (PowerBrightnessOp(opt), 1.0, 0.7),
+            (PowerBrightnessOp(opt), 1.0, 1.3),
+            (SinBrightnessOp(opt), 0.96, 1.0),
+            (ArcSinBrightnessOp(opt), 0.96, 1.0),
 
             (HigherContrastOp(opt), 0.0, 2.3),
             (LowerContrastOp(opt), 1.0, 1.3)]

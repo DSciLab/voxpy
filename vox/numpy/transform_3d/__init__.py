@@ -12,6 +12,8 @@ from .translate import RandomTranslate
 from .gaussian_blur import RandomGaussianBlur
 from .noise import RandomNoise
 from .squeeze import RandomSqueeze
+from .power_brightness import RandomPowerBrightness
+from .sin_brightness import RandomSinBrightness
 from .rand_aug import RandAugment
 
 from vox.numpy._transform import Transformer, \
