@@ -3,7 +3,7 @@ from numpy.core.fromnumeric import repeat
 from vox.numpy._transform import Transformer
 
 
-def crop_nonzero(inp):
+def crop_nonzero(inp, mask):
     assert inp.ndim == 4, \
         f'Expect inp number of dim to be 4, ' + \
         f'but inp.ndim={inp.ndim}'
@@ -18,7 +18,9 @@ def crop_nonzero(inp):
     z_max = np.max(z) + 1
     z_min = np.min(z)
 
-    return inp[:, x_min:x_max, y_min:y_max, z_min:z_max]
+    inp = inp[:, x_min:x_max, y_min:y_max, z_min:z_max]
+    mask = mask[:, x_min:x_max, y_min:y_max, z_min:z_max]
+    return inp, mask
 
 
 class _Pad(Transformer):
@@ -85,7 +87,7 @@ class ZeroPad(_Pad):
 
 class NearPadX(_Pad):
     def __call__(self, inp, mask=None):
-        inp = crop_nonzero(inp)
+        inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         x = inp_shape[1]
 
@@ -107,7 +109,7 @@ class NearPadX(_Pad):
 
 class NearPadY(_Pad):
     def __call__(self, inp, mask=None):
-        inp = crop_nonzero(inp)
+        inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         y = inp_shape[2]
 
@@ -129,7 +131,7 @@ class NearPadY(_Pad):
 
 class NearPadZ(_Pad):
     def __call__(self, inp, mask=None):
-        inp = crop_nonzero(inp)
+        inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         z = inp_shape[3]
 
@@ -149,9 +151,49 @@ class NearPadZ(_Pad):
             return output, output_mask
 
 
+class NearPad(_Pad):
+    def __call__(self, inp, mask=None):
+        inp, mask = crop_nonzero(inp, mask)
+        inp_shape = inp.shape
+        x = inp_shape[1]
+        y = inp_shape[2]
+        z = inp_shape[3]
+
+        target_x, target_y, target_z, pad_x_left, pad_y_left, pad_z_left \
+            = self.get_pad_size(inp)
+
+        pad_x_right = target_x - pad_x_left - x
+        pad_y_right = target_y - pad_y_left - y
+        pad_z_right = target_z - pad_z_left - z
+
+        repeat_x_list = [1] * x
+        repeat_x_list[0] = pad_x_left + 1
+        repeat_x_list[-1] = pad_x_right + 1
+
+        repeat_y_list = [1] * y
+        repeat_y_list[0] = pad_y_left + 1
+        repeat_y_list[-1] = pad_y_right + 1
+
+        repeat_z_list = [1] * z
+        repeat_z_list[0] = pad_z_left + 1
+        repeat_z_list[-1] = pad_z_right + 1
+
+        inp = np.repeat(inp, repeat_x_list, axis=1)
+        inp = np.repeat(inp, repeat_y_list, axis=2)
+        inp = np.repeat(inp, repeat_z_list, axis=3)
+
+        if mask is None:
+            return inp
+        else:
+            mask = np.repeat(mask, repeat_x_list, axis=1)
+            mask = np.repeat(mask, repeat_y_list, axis=2)
+            mask = np.repeat(mask, repeat_z_list, axis=3)
+            return inp, mask
+
+
 class ReflectPadX(_Pad):
     def __call__(self, inp, mask=None):
-        inp = crop_nonzero(inp)
+        inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         x = inp_shape[1]
 
@@ -181,7 +223,7 @@ class ReflectPadX(_Pad):
 
 class ReflectPadY(_Pad):
     def __call__(self, inp, mask=None):
-        inp = crop_nonzero(inp)
+        inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         y = inp_shape[2]
 
@@ -211,7 +253,7 @@ class ReflectPadY(_Pad):
 
 class ReflectPadZ(_Pad):
     def __call__(self, inp, mask=None):
-        inp = crop_nonzero(inp)
+        inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         z = inp_shape[3]
 
@@ -237,3 +279,60 @@ class ReflectPadZ(_Pad):
                                           mask,
                                           right_part_mask], axis=3)
             return output, output_mask
+
+
+class ReflectPad(_Pad):
+    def __call__(self, inp, mask=None):
+        inp, mask = crop_nonzero(inp, mask)
+        inp_shape = inp.shape
+        x = inp_shape[1]
+        y = inp_shape[2]
+        z = inp_shape[3]
+
+        target_x, target_y, target_z, pad_x_left, pad_y_left, pad_z_left \
+            = self.get_pad_size(inp)
+
+        pad_x_right = target_x - pad_x_left - x
+        pad_y_right = target_y - pad_y_left - y
+        pad_z_right = target_z - pad_z_left - z
+
+        left_part_inp_x = inp[:, :pad_x_left, :, :]
+        left_part_inp_x = left_part_inp_x[:, ::-1, :, :]
+        right_part_inp_x = inp[:, -pad_x_right:, :, :]
+        right_part_inp_x = right_part_inp_x[:, ::-1, :, :]
+        inp = np.concatenate([left_part_inp_x, inp, right_part_inp_x], axis=1)
+
+        left_part_inp_y = inp[:, :, :pad_y_left, :]
+        left_part_inp_y = left_part_inp_y[:, :, ::-1, :]
+        right_part_inp_y = inp[:, :, -pad_y_right:, :]
+        right_part_inp_y = right_part_inp_y[:, :, ::-1, :]
+        inp = np.concatenate([left_part_inp_y, inp, right_part_inp_y], axis=2)
+
+        left_part_inp_z = inp[:, :, :, :pad_z_left]
+        left_part_inp_z = left_part_inp_z[:, :, :, ::-1]
+        right_part_inp_z = inp[:, :, :, -pad_z_right:]
+        right_part_inp_z = right_part_inp_z[:, :, :, ::-1]
+        inp = np.concatenate([left_part_inp_z, inp, right_part_inp_z], axis=3)
+
+        if mask is None:
+            return inp
+        else:
+            left_part_mask_x = mask[:, :pad_x_left, :, :]
+            left_part_mask_x = left_part_mask_x[:, ::-1, :, :]
+            right_part_mask_x = mask[:, -pad_x_right:, :, :]
+            right_part_mask_x = right_part_mask_x[:, ::-1, :, :]
+            mask = np.concatenate([left_part_mask_x, mask, right_part_mask_x], axis=1)
+
+            left_part_mask_y = mask[:, :, :pad_y_left, :]
+            left_part_mask_y = left_part_mask_y[:, :, ::-1, :]
+            right_part_mask_y = mask[:, :, -pad_y_right:, :]
+            right_part_mask_y = right_part_mask_y[:, :, ::-1, :]
+            mask = np.concatenate([left_part_mask_y, mask, right_part_mask_y], axis=2)
+
+            left_part_mask_z = mask[:, :, :, :pad_z_left]
+            left_part_mask_z = left_part_mask_z[:, :, :, ::-1]
+            right_part_mask_z = mask[:, :, :, -pad_z_right:]
+            right_part_mask_z = right_part_mask_z[:, :, :, ::-1]
+            mask = np.concatenate([left_part_mask_z, mask, right_part_mask_z], axis=3)
+            
+            return inp, mask
