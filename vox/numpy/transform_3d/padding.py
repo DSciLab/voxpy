@@ -19,7 +19,7 @@ def crop_nonzero(inp, mask):
     z_min = np.min(z)
 
     inp = inp[:, x_min:x_max, y_min:y_max, z_min:z_max]
-    mask = mask[:, x_min:x_max, y_min:y_max, z_min:z_max]
+    mask = mask[x_min:x_max, y_min:y_max, z_min:z_max]
     return inp, mask
 
 
@@ -103,7 +103,7 @@ class NearPadX(_Pad):
         if mask is None:
             return output
         else:
-            output_mask = np.repeat(mask, repeat_x_list, axis=1)
+            output_mask = np.repeat(mask, repeat_x_list, axis=0)
             return output, output_mask
 
 
@@ -125,7 +125,7 @@ class NearPadY(_Pad):
         if mask is None:
             return output
         else:
-            output_mask = np.repeat(mask, repeat_y_list, axis=2)
+            output_mask = np.repeat(mask, repeat_y_list, axis=1)
             return output, output_mask
 
 
@@ -147,7 +147,7 @@ class NearPadZ(_Pad):
         if mask is None:
             return output
         else:
-            output_mask = np.repeat(mask, repeat_z_list, axis=3)
+            output_mask = np.repeat(mask, repeat_z_list, axis=2)
             return output, output_mask
 
 
@@ -185,9 +185,9 @@ class NearPad(_Pad):
         if mask is None:
             return inp
         else:
-            mask = np.repeat(mask, repeat_x_list, axis=1)
-            mask = np.repeat(mask, repeat_y_list, axis=2)
-            mask = np.repeat(mask, repeat_z_list, axis=3)
+            mask = np.repeat(mask, repeat_x_list, axis=0)
+            mask = np.repeat(mask, repeat_y_list, axis=1)
+            mask = np.repeat(mask, repeat_z_list, axis=2)
             return inp, mask
 
 
@@ -210,14 +210,14 @@ class ReflectPadX(_Pad):
         if mask is None:
             return output
         else:
-            left_part_mask = mask[:, :pad_x_left, :, :]
-            left_part_mask = left_part_mask[:, ::-1, :, :]
-            right_part_mask = mask[:, -pad_x_right:, :, :]
-            right_part_mask = right_part_mask[:, ::-1, :, :]
+            left_part_mask = mask[:pad_x_left, :, :]
+            left_part_mask = left_part_mask[::-1, :, :]
+            right_part_mask = mask[-pad_x_right:, :, :]
+            right_part_mask = right_part_mask[::-1, :, :]
 
             output_mask = np.concatenate([left_part_mask,
                                           mask,
-                                          right_part_mask], axis=1)
+                                          right_part_mask], axis=0)
             return output, output_mask
 
 
@@ -240,14 +240,14 @@ class ReflectPadY(_Pad):
         if mask is None:
             return output
         else:
-            left_part_mask = mask[:, :, :pad_y_left, :]
-            left_part_mask = left_part_mask[:, :, ::-1, :]
-            right_part_mask = mask[:, :, -pad_y_right:, :]
-            right_part_mask = right_part_mask[:, :, ::-1, :]
+            left_part_mask = mask[:, :pad_y_left, :]
+            left_part_mask = left_part_mask[:, ::-1, :]
+            right_part_mask = mask[:, -pad_y_right:, :]
+            right_part_mask = right_part_mask[:, ::-1, :]
 
             output_mask = np.concatenate([left_part_mask,
                                           mask,
-                                          right_part_mask], axis=2)
+                                          right_part_mask], axis=1)
             return output, output_mask
 
 
@@ -270,14 +270,14 @@ class ReflectPadZ(_Pad):
         if mask is None:
             return output
         else:
-            left_part_mask = mask[:, :, :, :pad_z_left]
-            left_part_mask = left_part_mask[:, :, :, ::-1]
-            right_part_mask = mask[:, :, :, -pad_z_right:]
-            right_part_mask = right_part_mask[:, :, :, ::-1]
+            left_part_mask = mask[:, :, :pad_z_left]
+            left_part_mask = left_part_mask[:, :, ::-1]
+            right_part_mask = mask[:, :, -pad_z_right:]
+            right_part_mask = right_part_mask[:, :, ::-1]
 
             output_mask = np.concatenate([left_part_mask,
                                           mask,
-                                          right_part_mask], axis=3)
+                                          right_part_mask], axis=2)
             return output, output_mask
 
 
@@ -317,22 +317,22 @@ class ReflectPad(_Pad):
         if mask is None:
             return inp
         else:
-            left_part_mask_x = mask[:, :pad_x_left, :, :]
-            left_part_mask_x = left_part_mask_x[:, ::-1, :, :]
-            right_part_mask_x = mask[:, -pad_x_right:, :, :]
-            right_part_mask_x = right_part_mask_x[:, ::-1, :, :]
-            mask = np.concatenate([left_part_mask_x, mask, right_part_mask_x], axis=1)
+            left_part_mask_x = mask[:pad_x_left, :, :]
+            left_part_mask_x = left_part_mask_x[::-1, :, :]
+            right_part_mask_x = mask[-pad_x_right:, :, :]
+            right_part_mask_x = right_part_mask_x[::-1, :, :]
+            mask = np.concatenate([left_part_mask_x, mask, right_part_mask_x], axis=0)
 
-            left_part_mask_y = mask[:, :, :pad_y_left, :]
-            left_part_mask_y = left_part_mask_y[:, :, ::-1, :]
-            right_part_mask_y = mask[:, :, -pad_y_right:, :]
-            right_part_mask_y = right_part_mask_y[:, :, ::-1, :]
-            mask = np.concatenate([left_part_mask_y, mask, right_part_mask_y], axis=2)
+            left_part_mask_y = mask[:, :pad_y_left, :]
+            left_part_mask_y = left_part_mask_y[:, ::-1, :]
+            right_part_mask_y = mask[:, -pad_y_right:, :]
+            right_part_mask_y = right_part_mask_y[:, ::-1, :]
+            mask = np.concatenate([left_part_mask_y, mask, right_part_mask_y], axis=1)
 
-            left_part_mask_z = mask[:, :, :, :pad_z_left]
-            left_part_mask_z = left_part_mask_z[:, :, :, ::-1]
-            right_part_mask_z = mask[:, :, :, -pad_z_right:]
-            right_part_mask_z = right_part_mask_z[:, :, :, ::-1]
-            mask = np.concatenate([left_part_mask_z, mask, right_part_mask_z], axis=3)
+            left_part_mask_z = mask[:, :, :pad_z_left]
+            left_part_mask_z = left_part_mask_z[:, :, ::-1]
+            right_part_mask_z = mask[:, :, -pad_z_right:]
+            right_part_mask_z = right_part_mask_z[:, :, ::-1]
+            mask = np.concatenate([left_part_mask_z, mask, right_part_mask_z], axis=2)
             
             return inp, mask

@@ -10,11 +10,13 @@ class PadAndGeneralSampling(Transformer):
         self.least_shape = opt.least_shape
         self.sampling_shape = opt.input_shape
 
-        self.rand_sampler = PadAndRandomSampling(self.least_shape, self.sampling_shape)
+        self.rand_sampler = PadAndRandomSampling(self.least_shape,
+                                                 self.sampling_shape)
         if sampler == 'random':
             self.sampler = self.rand_sampler
         if sampler == 'nonezero':
-            self.sampler = PadAndNoneZeroSampling(self.least_shape, self.sampling_shape)
+            self.sampler = PadAndNoneZeroSampling(self.least_shape,
+                                                  self.sampling_shape)
         else:
             raise RuntimeError(f'Unrecognized sampler.')
 
