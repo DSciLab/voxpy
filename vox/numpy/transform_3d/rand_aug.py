@@ -5,7 +5,7 @@ from vox.numpy._transform import Transformer
 from .sharp import Sharp
 from .contrast import HigherContrast, LowerContrast
 from .shear import ShearX, ShearY
-from .rotate import Rotate
+from .rotate import Rotate, Rotate90
 from .translate import TranslateX, TranslateY
 from .flip import FlipX, FlipY, FlipZ
 from .squeeze import SqueezeX, SqueezeY, SqueezeZ
@@ -39,7 +39,8 @@ __all__ = ['IdentityOp',
            'SqueezeXOp',
            'SqueezeYOp',
            'SqueezeZOp',
-           'RotateOp']
+           'RotateOp',
+           'Rotate90Op']
 
 
 class TransformerOp(object):
@@ -176,6 +177,15 @@ class RotateOp(TransformerOp):
         return self.transformer(inp, mask, theta=scale)
 
 
+class Rotate90Op(TransformerOp):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__()
+        self.transformer = Rotate90()
+
+    def __call__(self, inp, mask, *args, **kwargs):
+        return self.transformer(inp, mask)
+
+
 class ShearXOp(TransformerOp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
@@ -253,6 +263,23 @@ class SharpOp(TransformerOp):
                                 sharp_sigma=self.sharp_sigma)
 
 
+class ConflictOp(TransformerOp):
+    def __init__(self, *ops) -> None:
+        super().__init__()
+        for op in ops:
+            assert isinstance(op[0], TransformerOp)
+        self.ops = ops
+
+    def __call__(self, inp, mask, M):
+        op, minval, maxval = random.choices(self.ops)[0]
+
+        if minval is not None and maxval is not None:
+            val = float(M) * (maxval - minval) + minval
+        else:
+            val = None
+        return op(inp, mask, val)
+
+
 class RandAugment(Transformer):
     def __init__(self, opt) -> None:
         super().__init__()
@@ -265,62 +292,66 @@ class RandAugment(Transformer):
             f'type(rand_aug_N)={type(self.N)} len(rand_aug_N)=' +\
             f'{len(self.N) if isinstance(self.N, (tuple, list)) else None}'
 
-        self.geometry_aug_ops = [
+        self.color_aug_ops = [
             #   OP       minval      maxval
             (IdentityOp(opt), None, None),
             (HistEqualOp(opt), 0.0, 0.012),
-            (GaussianBlurOp(opt), 0.0, 0.6),
             (NoiseOp(opt), 0.0, 0.1),
-            (SharpOp(opt), 0.0, 2.5),
 
-            (PowerBrightnessOp(opt), 1.0, 0.7),
-            (PowerBrightnessOp(opt), 1.0, 1.3),
-            # (SinBrightnessOp(opt), 0.96, 1.0),
-            # (ArcSinBrightnessOp(opt), 0.96, 1.0),
+            (ConflictOp((GaussianBlurOp(opt), 0.0, 0.6),
+                        (SharpOp(opt), 0.0, 2.5)), None, None),
 
-            (HigherContrastOp(opt), 0.0, 2.3),
-            (LowerContrastOp(opt), 1.0, 1.3)]
+            (ConflictOp((PowerBrightnessOp(opt), 1.0, 0.7),
+                        (PowerBrightnessOp(opt), 1.0, 1.3),
+                        (SinBrightnessOp(opt), 0.96, 1.0),
+                        (ArcSinBrightnessOp(opt), 0.96, 1.0)), None, None),
 
-        self.color_aug_ops = [
+            (ConflictOp((HigherContrastOp(opt), 0.0, 2.3),
+                        (LowerContrastOp(opt), 1.0, 1.3)), None, None)]
+
+        self.geometry_aug_ops = [
             #   OP       minval      maxval
-            (ResizeOp(opt), 1.0, 0.7),
-            (ResizeOp(opt), 1.0, 1.3),
+            (ConflictOp((ResizeOp(opt), 1.0, 0.7),
+                        (ResizeOp(opt), 1.0, 1.3)), None, None),
+
+            (ConflictOp((TranslateXOp(opt), 0.0, 0.1),
+                        (TranslateXOp(opt), 0.0, -0.1),
+                        (TranslateYOp(opt), 0.0, 0.1),
+                        (TranslateYOp(opt), 0.0, -0.1)), None, None),
+
+            (ConflictOp((ShearXOp(opt), 0.0, 0.2),
+                        (ShearXOp(opt), 0.0, -0.2),
+                        (ShearYOp(opt), 0.0, 0.2),
+                        (ShearYOp(opt), 0.0, -0.2)), None, None),
+
+            (ConflictOp((SqueezeXOp(opt), 1.0, 0.8),
+                        (SqueezeXOp(opt), 1.0, 1.2),
+                        # (SqueezeZOp(opt), 1.0, 0.8),
+                        # (SqueezeZOp(opt), 1.0, 1.2),
+                        (SqueezeYOp(opt), 1.0, 0.8),
+                        (SqueezeYOp(opt), 1.0, 1.2)), None, None),
+
+            (ConflictOp((RotateOp(opt), 0.0, np.pi/8),
+                        (RotateOp(opt), 0.0, -np.pi/8)), None, None),
 
             (FlipZOp(opt), None, None),
             (FlipYOp(opt), None, None),
             (FlipXOp(opt), None, None),
 
-            (TranslateXOp(opt), 0.0, 0.1),
-            (TranslateXOp(opt), 0.0, -0.1),
-            (TranslateYOp(opt), 0.0, 0.1),
-            (TranslateYOp(opt), 0.0, -0.1),
-
-            (ShearXOp(opt), 0.0, 0.2),
-            (ShearXOp(opt), 0.0, -0.2),
-            (ShearYOp(opt), 0.0, 0.2),
-            (ShearYOp(opt), 0.0, -0.2),
-
-            (SqueezeXOp(opt), 1.0, 0.8),
-            (SqueezeXOp(opt), 1.0, 1.2),
-            (SqueezeYOp(opt), 1.0, 0.8),
-            (SqueezeYOp(opt), 1.0, 1.2),
-            (SqueezeZOp(opt), 1.0, 0.8),
-            (SqueezeZOp(opt), 1.0, 1.2),
-
-            (RotateOp(opt), 0.0, np.pi/8),
-            (RotateOp(opt), 0.0, -np.pi/8)]
+            (Rotate90Op(opt), None, None)]
 
     def __call__(self, inp, mask):
-        color_ops = random.sample(self.color_aug_ops, self.N[0])
-        geometry_ops = random.sample(self.geometry_aug_ops, self.N[1])
+        geometry_ops = random.sample(self.geometry_aug_ops, self.N[0])
+        color_ops = random.sample(self.color_aug_ops, self.N[1])
         ops = color_ops + geometry_ops
 
         for op, minval, maxval in ops:
-            if minval is not None and maxval is not None:
-                val = float(self.M) * (maxval - minval) + minval
+            if isinstance(op, ConflictOp):
+                inp, mask = op(inp, mask, M=self.M)
             else:
-                val = None
-            # print(op.__class__.__name__, '<<', inp.min(), inp.max())
-            inp, mask = op(inp, mask, val)
-            # print(op.__class__.__name__, '>>', inp.min(), inp.max())
+                if minval is not None and maxval is not None:
+                    val = float(self.M) * (maxval - minval) + minval
+                else:
+                    val = None
+                inp, mask = op(inp, mask, val)
         return inp, mask

@@ -282,7 +282,45 @@ class ReflectPadZ(_Pad):
 
 
 class ReflectPad(_Pad):
+    def fix_z_3x_limitation(self, inp, mask=None):
+        x = inp.shape[1]
+        y = inp.shape[2]
+        z = inp.shape[3]
+
+        if x >= self.least_shape[1] and \
+           y >= self.least_shape[2] and \
+           z >= self.least_shape[3]:
+            if mask is None:
+                return inp
+            else:
+                return inp, mask
+
+        target_c = inp.shape[0]
+        target_x = max(x, self.least_shape[1])
+        target_y = max(y, self.least_shape[2])
+        target_z = max(z, self.least_shape[3])
+
+        pad_x_left = (target_x - x) // 2
+        pad_y_left = (target_y - y) // 2
+        pad_z_left = (target_z - z) // 2
+
+        output = np.zeros((target_c, target_x, target_y, target_z))
+        output[:, pad_x_left: pad_x_left + x,
+                  pad_y_left: pad_y_left + y,
+                  pad_z_left: pad_z_left + z] = inp
+
+        if mask is None:
+            return output
+        else:
+            output_mask = np.zeros((target_x, target_y, target_z))
+            output_mask[pad_x_left: pad_x_left + x,
+                        pad_y_left: pad_y_left + y,
+                        pad_z_left: pad_z_left + z] = mask
+            return output, output_mask
+
+
     def __call__(self, inp, mask=None):
+        # original_shape = inp.shape
         inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         x = inp_shape[1]
@@ -296,43 +334,60 @@ class ReflectPad(_Pad):
         pad_y_right = target_y - pad_y_left - y
         pad_z_right = target_z - pad_z_left - z
 
-        left_part_inp_x = inp[:, :pad_x_left, :, :]
-        left_part_inp_x = left_part_inp_x[:, ::-1, :, :]
-        right_part_inp_x = inp[:, -pad_x_right:, :, :]
-        right_part_inp_x = right_part_inp_x[:, ::-1, :, :]
-        inp = np.concatenate([left_part_inp_x, inp, right_part_inp_x], axis=1)
+        if pad_x_right > 0:
+            left_part_inp_x = inp[:, :pad_x_left, :, :]
+            left_part_inp_x = left_part_inp_x[:, ::-1, :, :]
+            right_part_inp_x = inp[:, -pad_x_right:, :, :]
+            right_part_inp_x = right_part_inp_x[:, ::-1, :, :]
+            inp = np.concatenate([left_part_inp_x, inp, right_part_inp_x], axis=1)
 
-        left_part_inp_y = inp[:, :, :pad_y_left, :]
-        left_part_inp_y = left_part_inp_y[:, :, ::-1, :]
-        right_part_inp_y = inp[:, :, -pad_y_right:, :]
-        right_part_inp_y = right_part_inp_y[:, :, ::-1, :]
-        inp = np.concatenate([left_part_inp_y, inp, right_part_inp_y], axis=2)
+        if pad_y_right > 0:
+            left_part_inp_y = inp[:, :, :pad_y_left, :]
+            left_part_inp_y = left_part_inp_y[:, :, ::-1, :]
+            right_part_inp_y = inp[:, :, -pad_y_right:, :]
+            right_part_inp_y = right_part_inp_y[:, :, ::-1, :]
+            inp = np.concatenate([left_part_inp_y, inp, right_part_inp_y], axis=2)
 
-        left_part_inp_z = inp[:, :, :, :pad_z_left]
-        left_part_inp_z = left_part_inp_z[:, :, :, ::-1]
-        right_part_inp_z = inp[:, :, :, -pad_z_right:]
-        right_part_inp_z = right_part_inp_z[:, :, :, ::-1]
-        inp = np.concatenate([left_part_inp_z, inp, right_part_inp_z], axis=3)
+        if pad_z_right > 0:
+            left_part_inp_z = inp[:, :, :, :pad_z_left]
+            left_part_inp_z = left_part_inp_z[:, :, :, ::-1]
+            right_part_inp_z = inp[:, :, :, -pad_z_right:]
+            right_part_inp_z = right_part_inp_z[:, :, :, ::-1]
+            inp = np.concatenate([left_part_inp_z, inp, right_part_inp_z], axis=3)
+            # TODO fix 3 times limitation
+
+        # assert inp.shape[1] >= self.least_shape[1], \
+        #     f'output shape: {inp.shape}, input shape: {inp_shape}, ' +\
+        #     f'self.least_shape: {self.least_shape}, original shape: {original_shape}'
+        # assert inp.shape[2] >= self.least_shape[2], \
+        #     f'output shape: {inp.shape}, input shape: {inp_shape}, ' +\
+        #     f'self.least_shape: {self.least_shape}, original shape: {original_shape}'
+        # assert inp.shape[3] >= self.least_shape[3], \
+        #     f'output shape: {inp.shape}, input shape: {inp_shape}, ' +\
+        #     f'self.least_shape: {self.least_shape}, original shape: {original_shape}'
 
         if mask is None:
-            return inp
+            return self.fix_z_3x_limitation(inp)
         else:
-            left_part_mask_x = mask[:pad_x_left, :, :]
-            left_part_mask_x = left_part_mask_x[::-1, :, :]
-            right_part_mask_x = mask[-pad_x_right:, :, :]
-            right_part_mask_x = right_part_mask_x[::-1, :, :]
-            mask = np.concatenate([left_part_mask_x, mask, right_part_mask_x], axis=0)
+            if pad_x_right > 0:
+                left_part_mask_x = mask[:pad_x_left, :, :]
+                left_part_mask_x = left_part_mask_x[::-1, :, :]
+                right_part_mask_x = mask[-pad_x_right:, :, :]
+                right_part_mask_x = right_part_mask_x[::-1, :, :]
+                mask = np.concatenate([left_part_mask_x, mask, right_part_mask_x], axis=0)
 
-            left_part_mask_y = mask[:, :pad_y_left, :]
-            left_part_mask_y = left_part_mask_y[:, ::-1, :]
-            right_part_mask_y = mask[:, -pad_y_right:, :]
-            right_part_mask_y = right_part_mask_y[:, ::-1, :]
-            mask = np.concatenate([left_part_mask_y, mask, right_part_mask_y], axis=1)
+            if pad_y_right > 0:
+                left_part_mask_y = mask[:, :pad_y_left, :]
+                left_part_mask_y = left_part_mask_y[:, ::-1, :]
+                right_part_mask_y = mask[:, -pad_y_right:, :]
+                right_part_mask_y = right_part_mask_y[:, ::-1, :]
+                mask = np.concatenate([left_part_mask_y, mask, right_part_mask_y], axis=1)
 
-            left_part_mask_z = mask[:, :, :pad_z_left]
-            left_part_mask_z = left_part_mask_z[:, :, ::-1]
-            right_part_mask_z = mask[:, :, -pad_z_right:]
-            right_part_mask_z = right_part_mask_z[:, :, ::-1]
-            mask = np.concatenate([left_part_mask_z, mask, right_part_mask_z], axis=2)
-            
-            return inp, mask
+            if pad_z_right > 0:
+                left_part_mask_z = mask[:, :, :pad_z_left]
+                left_part_mask_z = left_part_mask_z[:, :, ::-1]
+                right_part_mask_z = mask[:, :, -pad_z_right:]
+                right_part_mask_z = right_part_mask_z[:, :, ::-1]
+                mask = np.concatenate([left_part_mask_z, mask, right_part_mask_z], axis=2)
+
+            return self.fix_z_3x_limitation(inp, mask)
