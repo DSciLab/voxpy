@@ -16,7 +16,7 @@ class FlipX(Transformer):
             inp = inp[::-1, :, :]
 
         mask = mask[::-1, :, :]
-        return inp, mask
+        return inp.copy(), mask.copy()
 
 
 class FlipY(Transformer):
@@ -33,7 +33,7 @@ class FlipY(Transformer):
             inp = inp[:, ::-1, :]
 
         mask = mask[:, ::-1, :]
-        return inp, mask
+        return inp.copy(), mask.copy()
 
 
 class FlipZ(Transformer):
@@ -50,7 +50,7 @@ class FlipZ(Transformer):
             inp = inp[:, :, ::-1]
 
         mask = mask[:, :, ::-1]
-        return inp, mask
+        return inp.copy(), mask.copy()
 
 
 class RandomFlip(Transformer):
