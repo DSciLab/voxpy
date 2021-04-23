@@ -11,9 +11,12 @@ class RandomSampling(Transformer):
         inp_shape = inp.shape
         assert inp.ndim == len(self.shape)
 
-        assert inp_shape[1] >= self.shape[1], f'x over sampling, {inp_shape[1]} > {self.shape[1]}'
-        assert inp_shape[2] >= self.shape[2], f'y over sampling, {inp_shape[2]} > {self.shape[2]}'
-        assert inp_shape[3] >= self.shape[3], f'z over sampling, {inp_shape[3]} > {self.shape[3]}'
+        assert inp_shape[1] >= self.shape[1], \
+            f'x over sampling, {inp_shape[1]} > {self.shape[1]}'
+        assert inp_shape[2] >= self.shape[2], \
+            f'y over sampling, {inp_shape[2]} > {self.shape[2]}'
+        assert inp_shape[3] >= self.shape[3], \
+            f'z over sampling, {inp_shape[3]} > {self.shape[3]}'
 
         x_available = (inp_shape[1] - self.shape[1]) // 2 + 1
         y_available = (inp_shape[2] - self.shape[2]) // 2 + 1
