@@ -354,7 +354,6 @@ class ReflectPad(_Pad):
             right_part_inp_z = inp[:, :, :, -pad_z_right:]
             right_part_inp_z = right_part_inp_z[:, :, :, ::-1]
             inp = np.concatenate([left_part_inp_z, inp, right_part_inp_z], axis=3)
-            # TODO fix 3 times limitation
 
         # assert inp.shape[1] >= self.least_shape[1], \
         #     f'output shape: {inp.shape}, input shape: {inp_shape}, ' +\
