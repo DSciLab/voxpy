@@ -28,24 +28,52 @@ class Rotate(Transformer):
 
         return move_axis_matrix @ rotate_matrix @ move_axis_matrix_back
 
-    def __call__(self, inp, mask, theta):
+    def __call__(self, inp, mask, theta, output_shape=None):
         assert inp.ndim in (3, 4), \
             f'input dim error inp.ndim={inp.ndim}'
         width = inp.shape[0]
         height = inp.shape[1]
 
+        if output_shape is not None:
+            if inp.ndim == 3:
+                assert len(output_shape) == 3, \
+                    f'output_shape not match the inp.ndim'
+            else:
+                # inp.ndim == 4
+                assert len(output_shape) in (3, 4), \
+                    f'output_shape not match the inp.ndim'
+                if len(output_shape) == 4:
+                    # ignore channel
+                    output_shape = output_shape[1:]
+
         affine_matrix = self.transform_matric(theta, width, height)
 
         if inp.ndim == 3:
-            inp = affine_transform(inp, affine_matrix, order=1)
+            inp = affine_transform(inp, affine_matrix, order=1,
+                                   output_shape=output_shape)
         else:
             inp_ = []
             for i in range(inp.shape[0]):
-                inp_.append(affine_transform(inp[i], affine_matrix, order=1))
+                inp_.append(affine_transform(inp[i], affine_matrix, order=1,
+                                             output_shape=output_shape))
             inp = np.stack(inp_, axis=0)
 
-        mask = affine_transform(mask, affine_matrix, order=0)
+        mask = affine_transform(mask, affine_matrix, order=0,
+                                output_shape=output_shape)
         return inp, mask.round()
+
+
+class Rotate90(Transformer):
+    def __call__(self, inp, mask):
+        assert inp.ndim in (3, 4), \
+            f'input dim error inp.ndim={inp.ndim}'
+        if inp.ndim == 3:
+            inp = np.transpose(inp, axes=(1, 0, 2))
+        else:
+            # inp.dim == 4
+            inp = np.transpose(inp, axes=(0, 2, 1, 3))
+        mask = np.transpose(mask, axes=(1, 0, 2))
+        return inp.copy(), mask.copy()
 
 
 class RandomRotate(Transformer):
