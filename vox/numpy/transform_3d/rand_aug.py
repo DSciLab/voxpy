@@ -1,3 +1,5 @@
+from typing import Optional, Tuple, Union
+from cfg import Opts
 import numpy as np
 import random
 from vox.numpy._transform import Transformer
@@ -56,7 +58,9 @@ class IdentityOp(TransformerOp):
         super().__init__()
         self.transformer = Identity()
 
-    def __call__(self, inp, mask, *args, **kwargs):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray, *args, **kwargs
+                 ) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask)
 
 
@@ -65,16 +69,18 @@ class ResizeOp(TransformerOp):
         super().__init__()
         self.transformer = Resize()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, scale=scale)
 
 
 class HistEqualOp(TransformerOp):
-    def __init__(self, opt) -> None:
+    def __init__(self, opt: Opts) -> None:
         super().__init__()
         self.transformer = HistEqual(opt.max_val)
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, alpha=scale)
 
 
@@ -83,7 +89,8 @@ class GaussianBlurOp(TransformerOp):
         super().__init__()
         self.transformer = GaussianBlur()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, sigma=scale)
 
 
@@ -92,7 +99,8 @@ class NoiseOp(TransformerOp):
         super().__init__()
         self.transformer = Noise()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, std_scale=scale)
 
 
@@ -101,7 +109,8 @@ class FlipZOp(TransformerOp):
         super().__init__()
         self.transformer = FlipZ()
 
-    def __call__(self, inp, mask, *args, **kwargs):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 *args, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask)
 
 
@@ -110,7 +119,8 @@ class FlipYOp(TransformerOp):
         super().__init__()
         self.transformer = FlipY()
 
-    def __call__(self, inp, mask, *args, **kwargs):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 *args, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask)
 
 
@@ -119,7 +129,8 @@ class FlipXOp(TransformerOp):
         super().__init__()
         self.transformer = FlipX()
 
-    def __call__(self, inp, mask, *args, **kwargs):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 *args, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask)
 
 
@@ -128,7 +139,8 @@ class SqueezeXOp(TransformerOp):
         super().__init__()
         self.transformer = SqueezeX()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, scale)
 
 
@@ -137,7 +149,8 @@ class SqueezeYOp(TransformerOp):
         super().__init__()
         self.transformer = SqueezeY()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, scale)
 
 
@@ -146,7 +159,8 @@ class SqueezeZOp(TransformerOp):
         super().__init__()
         self.transformer = SqueezeZ()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, scale)
 
 
@@ -155,7 +169,8 @@ class TranslateXOp(TransformerOp):
         super().__init__()
         self.transformer = TranslateX()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, scale=scale)
 
 
@@ -164,7 +179,8 @@ class TranslateYOp(TransformerOp):
         super().__init__()
         self.transformer = TranslateY()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, scale=scale)
 
 
@@ -173,7 +189,8 @@ class RotateOp(TransformerOp):
         super().__init__()
         self.transformer = Rotate()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, theta=scale)
 
 
@@ -182,7 +199,8 @@ class Rotate90Op(TransformerOp):
         super().__init__()
         self.transformer = Rotate90()
 
-    def __call__(self, inp, mask, *args, **kwargs):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 *args, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask)
 
 
@@ -191,7 +209,8 @@ class ShearXOp(TransformerOp):
         super().__init__()
         self.transformer = ShearX()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, theta=scale)
 
 
@@ -200,91 +219,106 @@ class ShearYOp(TransformerOp):
         super().__init__()
         self.transformer = ShearY()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, theta=scale)
 
 
 class HigherContrastOp(TransformerOp):
-    def __init__(self, opt) -> None:
+    def __init__(self, opt: Opts) -> None:
         super().__init__()
         self.transformer = HigherContrast(opt.max_val)
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, alpha=scale)
 
 
 class LowerContrastOp(TransformerOp):
-    def __init__(self, opt) -> None:
+    def __init__(self, opt: Opts) -> None:
         super().__init__()
         self.transformer = LowerContrast(opt.max_val)
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, alpha=scale)
 
 
 class PowerBrightnessOp(TransformerOp):
-    def __init__(self, opt) -> None:
+    def __init__(self, opt: Optional[Opts]=None) -> None:
         super().__init__()
         self.transformer = PowerBrightness()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, power=scale)
 
 
 class SinBrightnessOp(TransformerOp):
-    def __init__(self, opt) -> None:
+    def __init__(self, opt: Optional[np.ndarray]=None) -> None:
         super().__init__()
         self.transformer = SinBrightness()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, scale=scale)
 
 
 class ArcSinBrightnessOp(TransformerOp):
-    def __init__(self, opt) -> None:
+    def __init__(self, opt: Optional[Opts]=None) -> None:
         super().__init__()
         self.transformer = ArcSinBrightness()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, scale=scale)
 
 
 class SharpOp(TransformerOp):
-    def __init__(self, opt) -> None:
+    def __init__(self, opt: Opts) -> None:
         super().__init__()
         denoise_sigma, sharp_sigma = tuple(opt.get('aug_sharp_sigma', [0.1, 0.4]))
         self.denoise_sigma = denoise_sigma
         self.sharp_sigma = sharp_sigma
         self.transformer = Sharp()
 
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask, alpha=scale,
                                 denoise_sigma=self.denoise_sigma,
                                 sharp_sigma=self.sharp_sigma)
 
 
 class ConflictOp(TransformerOp):
-    def __init__(self, *ops) -> None:
+    def __init__(self, *ops: TransformerOp) -> None:
         super().__init__()
         for op in ops:
             assert isinstance(op[0], TransformerOp)
         self.ops = ops
 
-    def __call__(self, inp, mask, M):
+    def __call__(self, inp: np.ndarray, mask: np.ndarray,
+                 M: float, rand: bool) -> Tuple[np.ndarray, np.ndarray]:
         op, minval, maxval = random.choices(self.ops)[0]
-
-        if minval is not None and maxval is not None:
-            val = float(M) * (maxval - minval) + minval
-        else:
-            val = None
+        val = get_aug_value(maxval, minval, M, rand)
         return op(inp, mask, val)
+
+    def __str__(self) -> str:
+        string = '<ConflictOp ['
+        for op in self.ops:
+            string += str(op) + ', '
+        string = string[:-2]
+        string += ']>'
+        return string
+
+    __repr__ = __str__
 
 
 class RandAugment(Transformer):
-    def __init__(self, opt) -> None:
+    def __init__(self, opt: Opts) -> None:
         super().__init__()
         self.N = opt.rand_aug_N
         self.M = opt.rand_aug_M
+        self.rand = opt.get('rand_aug_val', True)
 
         assert isinstance(self.N, (tuple, list)) and len(self.N) == 2, \
             f'The type of rand_aug_N should be list or tuple, ' +\
@@ -298,7 +332,7 @@ class RandAugment(Transformer):
             (HistEqualOp(opt), 0.0, 0.012),
             (NoiseOp(opt), 0.0, 0.1),
 
-            (ConflictOp((GaussianBlurOp(opt), 0.0, 0.6),
+            (ConflictOp((GaussianBlurOp(opt), 0.0, 1.0),
                         (SharpOp(opt), 0.0, 2.5)), None, None),
 
             (ConflictOp((PowerBrightnessOp(opt), 1.0, 0.7),
@@ -340,18 +374,43 @@ class RandAugment(Transformer):
 
             (Rotate90Op(opt), None, None)]
 
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         geometry_ops = random.sample(self.geometry_aug_ops, self.N[0])
         color_ops = random.sample(self.color_aug_ops, self.N[1])
         ops = color_ops + geometry_ops
 
         for op, minval, maxval in ops:
+            # print(op)
+            # print('inp.min()', inp.min())
+            # print('inp.max()', inp.max())
+            # print('inp.mean()', inp.mean())
+            # print('inp.shape', inp.shape)
+            # print('=====')
             if isinstance(op, ConflictOp):
-                inp, mask = op(inp, mask, M=self.M)
+                try:
+                    inp, mask = op(inp, mask, M=self.M, rand=self.rand)
+                except Exception as e:
+                    print(op)
+                    raise e
             else:
-                if minval is not None and maxval is not None:
-                    val = float(self.M) * (maxval - minval) + minval
-                else:
-                    val = None
-                inp, mask = op(inp, mask, val)
+                val = get_aug_value(maxval, minval, self.M, self.rand)
+                try:
+                    inp, mask = op(inp, mask, val)
+                except Exception as e:
+                    print(op)
+                    raise e
         return inp, mask
+
+
+def get_aug_value(maxval: Union[float, None], minval: Union[float, None],
+                  M: float, rand: Optional[bool]=True) -> Union[float, None]:
+    if minval is not None and maxval is not None:
+        if not rand:
+            val = M * (maxval - minval) + minval
+        else:
+            val = np.random.uniform(low=minval, high=maxval)
+    else:
+        val = None
+    
+    return val

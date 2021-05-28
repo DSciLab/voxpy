@@ -1,3 +1,4 @@
+from typing import Optional, Tuple, Union
 import numpy as np
 from vox.numpy._transform import Transformer
 
@@ -6,7 +7,9 @@ class FlipX(Transformer):
     def __init__(self) -> None:
         super().__init__()
 
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         assert inp.ndim in (3, 4), \
             f'input dim error inp.ndim={inp.ndim}'
 
@@ -15,15 +18,20 @@ class FlipX(Transformer):
         else:
             inp = inp[::-1, :, :]
 
-        mask = mask[::-1, :, :]
-        return inp.copy(), mask.copy()
+        if mask is not None:
+            mask = mask[::-1, :, :]
+            return inp.copy(), mask.copy()
+        else:
+            return inp.copy()
 
 
 class FlipY(Transformer):
     def __init__(self) -> None:
         super().__init__()
 
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         assert inp.ndim in (3, 4), \
             f'input dim error inp.ndim={inp.ndim}'
 
@@ -32,15 +40,20 @@ class FlipY(Transformer):
         else:
             inp = inp[:, ::-1, :]
 
-        mask = mask[:, ::-1, :]
-        return inp.copy(), mask.copy()
+        if mask is not None:
+            mask = mask[:, ::-1, :]
+            return inp.copy(), mask.copy()
+        else:
+            return inp.copy()
 
 
 class FlipZ(Transformer):
     def __init__(self) -> None:
         super().__init__()
 
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         assert inp.ndim in (3, 4), \
             f'input dim error inp.ndim={inp.ndim}'
 
@@ -49,12 +62,16 @@ class FlipZ(Transformer):
         else:
             inp = inp[:, :, ::-1]
 
-        mask = mask[:, :, ::-1]
-        return inp.copy(), mask.copy()
+        if mask is not None:
+            mask = mask[:, :, ::-1]
+            return inp.copy(), mask.copy()
+        else:
+            return inp.copy()
 
 
 class RandomFlip(Transformer):
-    def __init__(self, threhold=0.5, decay=None) -> None:
+    def __init__(self, threhold: Optional[float]=0.5,
+                 decay: Optional[float]=None) -> None:
         super().__init__()
         self.decay = decay
         self.threhold = threhold
@@ -62,20 +79,27 @@ class RandomFlip(Transformer):
         self.flip_y = FlipY()
         self.flip_z = FlipZ()
 
-    def update_param(self, verbose=False, *args, **kwargs):
-        if self.decay is not None:
-            self.threhold += (1 - self.threhold) * (1 - self.decay)
-            if verbose:
-                print(f'Update {self.__class__.__name__} parameter to '
-                      f'{self.threhold}')
-
-    def __call__(self, inp, mask):
-        rand = np.random.rand(3)
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+        rand = np.random.uniform(0, 1, 3)
         if rand[0] > 0.5:
-            inp, mask = self.flip_x(inp, mask)
+            if mask is None:
+                inp = self.flip_x(inp)
+            else:
+                inp, mask = self.flip_x(inp, mask)
         if rand[1] > 0.5:
-            inp, mask = self.flip_y(inp, mask)
+            if mask is None:
+                inp = self.flip_y(inp)
+            else:
+                inp, mask = self.flip_y(inp, mask)
         if rand[2] > 0.5:
-            inp, mask = self.flip_z(inp, mask)
+            if mask is None:
+                inp = self.flip_z(inp)
+            else:
+                inp, mask = self.flip_z(inp, mask)
 
-        return inp, mask
+        if mask is None:
+            return inp
+        else:
+            return inp, mask

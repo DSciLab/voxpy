@@ -1,17 +1,29 @@
+from typing import List, Optional, Tuple, Union
 import numpy as np
 from vox.numpy._transform import Transformer
+from .utils import get_range_val
 
 
 class Brightness(Transformer):
-    def __call__(self, inp, mask, scale):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None,
+                 scale: Union[float, List[float], Tuple[float, float]]=0.2
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+
         assert scale >= 0.0 and scale <= 1.0
         inp = self.brightness_adjust(inp, scale)
-        return inp, mask
+        if mask is not None:
+            return inp, mask
+        else:
+            return mask
 
 
 class SinBrightness(Brightness):
     @staticmethod
-    def brightness_adjust(inp, scale):
+    def brightness_adjust(inp: np.ndarray,
+                          scale: Union[float, List[float], Tuple[float, float]]
+                          ) -> np.ndarray:
+        scale = get_range_val(scale)
         max_inp = np.max(inp)
         min_inp = np.min(inp)
         range_inp = max_inp - min_inp
@@ -24,7 +36,10 @@ class SinBrightness(Brightness):
 
 class ArcSinBrightness(Brightness):
     @staticmethod
-    def brightness_adjust(inp, scale):
+    def brightness_adjust(inp: np.ndarray,
+                          scale: Union[float, List[float], Tuple[float, float]]
+                          ) -> np.ndarray:
+        scale = get_range_val(scale)
         max_inp = np.max(inp)
         min_inp = np.min(inp)
         range_inp = max_inp - min_inp
@@ -36,7 +51,8 @@ class ArcSinBrightness(Brightness):
 
 
 class RandomSinBrightness(Transformer):
-    def __init__(self, min_val, max_val, threhold=1.0) -> None:
+    def __init__(self, min_val: float, max_val: float,
+                 threhold: float=1.0) -> None:
         super().__init__()
         threhold = float(threhold)
         assert threhold >= 0.0 and threhold <= 1.0, \
@@ -55,7 +71,9 @@ class RandomSinBrightness(Transformer):
         self.sin_brightness_adjust = SinBrightness()
         self.arcsin_brightness_adjust = ArcSinBrightness()
 
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         val = np.random.rand()
         if val > self.threhold:
             # do nothing

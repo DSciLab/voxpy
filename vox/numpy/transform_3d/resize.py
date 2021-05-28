@@ -1,4 +1,6 @@
+from typing import List, Optional, Tuple, Union
 import numpy as np
+from numpy.core.fromnumeric import size
 from scipy.ndimage import affine_transform
 from vox.numpy._transform import Transformer
 
@@ -7,7 +9,8 @@ class Resize(Transformer):
     def __init__(self) -> None:
         super().__init__()
 
-    def transform_matric(self, scale):
+    def transform_matric(self, scale: Union[Tuple[int, int, int],
+                                            List[int]]) -> np.ndarray:
         assert len(scale) == 3, f'len(sclae) = {len(scale)} != 3'
         resize_axis_matrix = np.array(
             [[1 / scale[0],     0.,            0.,     0.],
@@ -17,7 +20,11 @@ class Resize(Transformer):
 
         return resize_axis_matrix
 
-    def __call__(self, inp, mask, scale=None, size=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray,
+                 scale: Optional[Union[float, Tuple[float, float, float], List[float]]]=None,
+                 size: Optional[Union[int, Tuple[int, int, int], List[int]]]=None
+                 ) -> Tuple[np.ndarray, np.ndarray]:
         assert scale is not None or size is not None, \
             'Scale is None and size is None.'
         assert scale is None or size is None, \
@@ -59,8 +66,20 @@ class Resize(Transformer):
         return inp, mask.round()
 
 
+class ResizeTo(Transformer):
+    def __init__(self, shape: Union[Tuple[int, int, int, int], List[int]]) -> None:
+        super().__init__()
+        self.shape = shape
+        self.resize = Resize()
+
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        return self.resize(inp, mask, size=self.shape[1:])
+
+
 class RandomResize(Transformer):
-    def __init__(self, r_min, r_max, decay=None) -> None:
+    def __init__(self, r_min: float, r_max: float,
+                 decay: Optional[float]=None) -> None:
         super().__init__()
         assert r_max > r_min, \
             f'r_max <= r_min, r_max={r_max} and r_min={r_min}'
@@ -69,27 +88,21 @@ class RandomResize(Transformer):
         self.decay = decay
         self.resizer = Resize()
 
-    def update_param(self, verbose=False, *args, **kwargs):
-        if self.decay is not None:
-            self.r_max = self.decay * self.r_max + (1 - self.decay)
-            self.r_min = self.decay * self.r_min + (1 - self.decay)
-            if verbose:
-                print(f'Update {self.__class__.__name__} parameter to '
-                      f'{self.r_min}~{self.r_max}')
-
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         scale = np.random.rand() * (self.r_max - self.r_min) + self.r_min
         return self.resizer(inp, mask, scale=scale)
 
 
 class MaxSize(Transformer):
-    def __init__(self, size) -> None:
+    def __init__(self, size: Union[Tuple[int, int, int, int], List[int]]) -> None:
         super().__init__()
         assert isinstance(size, (tuple, list)) and len(size) == 3
         self.size = size
         self.resizer = Resize()
 
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         mask_shape = mask.shape
         if np.prod(mask_shape) > np.prod(self.size):
             return self.resizer(inp, mask, size=self.size)

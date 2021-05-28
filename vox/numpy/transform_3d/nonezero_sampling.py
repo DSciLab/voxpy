@@ -1,8 +1,10 @@
+from typing import List, Tuple, Union
 import numpy as np
 from vox.numpy._transform import Transformer
 
 
-def find_none_zero_bbox_single_channel(mask):
+def find_none_zero_bbox_single_channel(mask: np.ndarray) \
+        -> Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]:
     x, y, z = np.where(mask > 0)
 
     x_low = np.min(x)
@@ -17,7 +19,8 @@ def find_none_zero_bbox_single_channel(mask):
     return ((x_low, x_high), (y_low, y_high), (z_low, z_high))
 
 
-def merge_bbox(*bboxs):
+def merge_bbox(*bboxs: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]
+              ) -> Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]:
     final_bbox = None
 
     for bbox in bboxs:
@@ -35,7 +38,9 @@ def merge_bbox(*bboxs):
     return final_bbox
 
 
-def find_none_zero_bbox(mask):
+def find_none_zero_bbox(mask: np.ndarray) -> Tuple[Tuple[int, int],
+                                                   Tuple[int, int],
+                                                   Tuple[int, int]]:
     return find_none_zero_bbox_single_channel(mask)
     # assert mask.ndim == 4
 
@@ -48,11 +53,12 @@ def find_none_zero_bbox(mask):
 
 
 class NoneZeroSampling(Transformer):
-    def __init__(self, shape):
+    def __init__(self, shape: Union[Tuple[int, int, int, int], List[int]]) -> None:
         super().__init__()
         self.shape = shape     # C * X * Y * Z
 
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         bbox = find_none_zero_bbox(mask)   # X * Y * Z
         inp_shape = inp.shape  # C * X * Y * Z
 
@@ -62,6 +68,34 @@ class NoneZeroSampling(Transformer):
                              min(inp_shape[2] - self.shape[2], bbox[1][1]) + 1)
         z_start_available = (max(0, bbox[2][0] - self.shape[3]), \
                              min(inp_shape[3] - self.shape[3], bbox[2][1]) + 1)
+
+        x_start = np.random.randint(*x_start_available)
+        y_start = np.random.randint(*y_start_available)
+        z_start = np.random.randint(*z_start_available)
+
+        return inp[:, x_start: x_start + self.shape[1], \
+                      y_start: y_start + self.shape[2], \
+                      z_start: z_start + self.shape[3]], \
+               mask[x_start: x_start + self.shape[1], \
+                    y_start: y_start + self.shape[2], \
+                    z_start: z_start + self.shape[3]]
+
+
+class NoneZeroSamplingXY(Transformer):
+    def __init__(self, shape: Union[Tuple[int, int, int, int], List[int]]) -> None:
+        super().__init__()
+        self.shape = shape     # C * X * Y * Z
+
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        bbox = find_none_zero_bbox(mask)   # X * Y * Z
+        inp_shape = inp.shape  # C * X * Y * Z
+
+        x_start_available = (max(0, bbox[0][0] - self.shape[1]), \
+                             min(inp_shape[1] - self.shape[1], bbox[0][1]) + 1)
+        y_start_available = (max(0, bbox[1][0] - self.shape[2]), \
+                             min(inp_shape[2] - self.shape[2], bbox[1][1]) + 1)
+        z_start_available = (0, inp_shape[3] - self.shape[3] + 1)
 
         x_start = np.random.randint(*x_start_available)
         y_start = np.random.randint(*y_start_available)

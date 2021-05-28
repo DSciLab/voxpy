@@ -1,3 +1,4 @@
+from typing import List, Optional, Tuple, Union
 import numpy as np
 from scipy.ndimage import affine_transform
 from vox.numpy._transform import Transformer
@@ -8,7 +9,7 @@ class Translate(Transformer):
     def __init__(self) -> None:
         super().__init__()
 
-    def transform_matric(self, size):
+    def transform_matric(self, size: Union[Tuple[int, int, int], List[int]]):
         assert len(size) == 3, f'len(sclae) = {len(size)} != 3'
         translation_axis_matrix = np.array(
             [[1., 0., 0., size[0]],
@@ -18,7 +19,11 @@ class Translate(Transformer):
 
         return translation_axis_matrix
 
-    def translate(self, inp, mask, scale=None, size=None):
+    def translate(self, inp: np.ndarray,
+                  mask: np.ndarray,
+                  scale: Optional[Union[Tuple[float, float, float], List[float]]]=None,
+                  size: Optional[Union[Tuple[int, int, int], List[int]]]=None
+                  ) -> Tuple[np.ndarray, np.ndarray]:
         if scale is not None:
             assert isinstance(scale, (tuple, list)) and len(scale) == 3, \
                 f'The type of scale is not tuple or list, or the length ' + \
@@ -52,7 +57,11 @@ class Translate(Transformer):
 
 
 class TranslateX(Translate):
-    def __call__(self, inp, mask, scale=None, size=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray,
+                 scale: Optional[Union[Tuple[float, float, float], List[float]]]=None,
+                 size: Optional[Union[Tuple[int, int, int], List[int]]]=None
+                 ) -> Tuple[np.ndarray, np.ndarray]:
         assert scale is not None or size is not None, \
             'Scale is None and size is None.'
         assert scale is None or size is None, \
@@ -70,7 +79,11 @@ class TranslateX(Translate):
 
 
 class TranslateY(Translate):
-    def __call__(self, inp, mask, scale=None, size=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray,
+                 scale: Optional[Union[Tuple[float, float, float], List[float]]]=None,
+                 size: Optional[Union[Tuple[int, int, int], List[int]]]=None
+                 ) -> Tuple[np.ndarray, np.ndarray]:
         assert scale is not None or size is not None, \
             'Scale is None and size is None.'
         assert scale is None or size is None, \
@@ -88,7 +101,11 @@ class TranslateY(Translate):
 
 
 class TranslateXYZ(Translate):
-    def __call__(self, inp, mask, scale=None, size=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray,
+                 scale: Optional[Union[Tuple[float, float, float], List[float]]]=None,
+                 size: Optional[Union[Tuple[int, int, int], List[int]]]=None
+                 ) -> Tuple[np.ndarray, np.ndarray]:
         assert scale is not None or size is not None, \
             'Scale is None and size is None.'
         assert scale is None or size is None, \
@@ -103,7 +120,9 @@ class TranslateXYZ(Translate):
 
 
 class RandomTranslate(Transformer):
-    def __init__(self, r_min, r_max, depth_translate=False, decay=None) -> None:
+    def __init__(self, r_min: float, r_max: float,
+                 depth_translate: Optional[bool]=False,
+                 decay: Optional[float]=None) -> None:
         super().__init__()
         assert r_max > r_min, \
             f'r_max <= r_min, r_max={r_max} and r_min={r_min}'
@@ -113,15 +132,8 @@ class RandomTranslate(Transformer):
         self.depth_translate = depth_translate
         self.translator = Translate()
 
-    def update_param(self, verbose=False, *args, **kwargs):
-        if self.decay is not None:
-            self.r_max *= self.decay
-            self.r_min *= self.decay
-            if verbose:
-                print(f'Update {self.__class__.__name__} parameter to '
-                      f'{self.r_min}~{self.r_max}')
-
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         scale = np.random.rand() * (self.r_max - self.r_min) + self.r_min
         if not self.depth_translate:
             scale = (scale, scale, 0)

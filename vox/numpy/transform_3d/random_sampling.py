@@ -1,13 +1,16 @@
+from typing import List, Optional, Tuple, Union
 import numpy as np
 from vox.numpy._transform import Transformer
 
 
 class RandomSampling(Transformer):
-    def __init__(self, shape):
+    def __init__(self, shape: Union[Tuple[int, int, int, int], List[int]]) -> None:
         super().__init__()
         self.shape = shape
 
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         inp_shape = inp.shape
         assert inp.ndim == len(self.shape)
 

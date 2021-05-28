@@ -1,36 +1,17 @@
+from typing import List, Optional, Tuple, Union
 import numpy as np
-from numpy.core.fromnumeric import repeat
 from vox.numpy._transform import Transformer
-
-
-def crop_nonzero(inp, mask):
-    assert inp.ndim == 4, \
-        f'Expect inp number of dim to be 4, ' + \
-        f'but inp.ndim={inp.ndim}'
-    _, x, y, z = np.where(inp > 0)
-
-    x_max = np.max(x) + 1
-    x_min = np.min(x)
-
-    y_max = np.max(y) + 1
-    y_min = np.min(y)
-
-    z_max = np.max(z) + 1
-    z_min = np.min(z)
-
-    inp = inp[:, x_min:x_max, y_min:y_max, z_min:z_max]
-    mask = mask[x_min:x_max, y_min:y_max, z_min:z_max]
-    return inp, mask
+from .nonezero_crop import crop_nonzero
 
 
 class _Pad(Transformer):
-    def __init__(self, least_shape):
+    def __init__(self, least_shape: Union[Tuple[int, int, int, int], List[int]]) -> None:
         super().__init__()
         assert len(least_shape) == 4
         # shape (C, X, Y, Z)
         self.least_shape = least_shape
 
-    def get_pad_size(self, inp):
+    def get_pad_size(self, inp: np.ndarray) -> Tuple[int, int, int, int, int, int]:
         inp_shape = inp.shape
         assert inp.ndim == len(self.least_shape), \
             'Dim not consistent.'
@@ -60,7 +41,9 @@ class _Pad(Transformer):
 
 
 class ZeroPad(_Pad):
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         inp_shape = inp.shape
         c = inp_shape[0]
         x = inp_shape[1]
@@ -86,7 +69,9 @@ class ZeroPad(_Pad):
 
 
 class NearPadX(_Pad):
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         x = inp_shape[1]
@@ -108,7 +93,9 @@ class NearPadX(_Pad):
 
 
 class NearPadY(_Pad):
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         y = inp_shape[2]
@@ -130,7 +117,9 @@ class NearPadY(_Pad):
 
 
 class NearPadZ(_Pad):
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         z = inp_shape[3]
@@ -152,7 +141,9 @@ class NearPadZ(_Pad):
 
 
 class NearPad(_Pad):
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         x = inp_shape[1]
@@ -192,7 +183,9 @@ class NearPad(_Pad):
 
 
 class ReflectPadX(_Pad):
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         x = inp_shape[1]
@@ -222,7 +215,9 @@ class ReflectPadX(_Pad):
 
 
 class ReflectPadY(_Pad):
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         y = inp_shape[2]
@@ -252,7 +247,9 @@ class ReflectPadY(_Pad):
 
 
 class ReflectPadZ(_Pad):
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape
         z = inp_shape[3]
@@ -282,7 +279,9 @@ class ReflectPadZ(_Pad):
 
 
 class ReflectPad(_Pad):
-    def fix_z_3x_limitation(self, inp, mask=None):
+    def fix_z_3x_limitation(self, inp: np.ndarray,
+                            mask: Optional[np.ndarray]=None
+                            ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         x = inp.shape[1]
         y = inp.shape[2]
         z = inp.shape[3]
@@ -319,7 +318,9 @@ class ReflectPad(_Pad):
             return output, output_mask
 
 
-    def __call__(self, inp, mask=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: Optional[np.ndarray]=None
+                 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         # original_shape = inp.shape
         inp, mask = crop_nonzero(inp, mask)
         inp_shape = inp.shape

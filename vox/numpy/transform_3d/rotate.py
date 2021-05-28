@@ -1,3 +1,4 @@
+from typing import List, Optional, Tuple, Union
 import numpy as np
 from scipy.ndimage import affine_transform
 from vox.numpy._transform import Transformer
@@ -7,7 +8,8 @@ class Rotate(Transformer):
     def __init__(self) -> None:
         super().__init__()
 
-    def transform_matric(self, theta, width, height):
+    def transform_matric(self, theta: float, width: int,
+                         height: int) -> np.ndarray:
         move_axis_matrix = np.array(
             [[1.,     0.,   0.,   width / 2.],
              [0.,     1.,   0.,  height / 2.],
@@ -28,7 +30,13 @@ class Rotate(Transformer):
 
         return move_axis_matrix @ rotate_matrix @ move_axis_matrix_back
 
-    def __call__(self, inp, mask, theta, output_shape=None):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray,
+                 theta: float,
+                 output_shape: Optional[Union[Tuple[int, int, int],
+                                              Tuple[int, int, int, int],
+                                              List[int]]]=None
+                 ) -> Tuple[np.ndarray, np.ndarray]:
         assert inp.ndim in (3, 4), \
             f'input dim error inp.ndim={inp.ndim}'
         width = inp.shape[0]
@@ -64,7 +72,8 @@ class Rotate(Transformer):
 
 
 class Rotate90(Transformer):
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         assert inp.ndim in (3, 4), \
             f'input dim error inp.ndim={inp.ndim}'
         if inp.ndim == 3:
@@ -77,7 +86,8 @@ class Rotate90(Transformer):
 
 
 class RandomRotate(Transformer):
-    def __init__(self, r_min, r_max, decay=None) -> None:
+    def __init__(self, r_min: float, r_max: float,
+                 decay: Optional[float]=None) -> None:
         super().__init__()
         assert r_max > r_min, \
             f'r_max <= r_min, r_max={r_max} and r_min={r_min}'
@@ -86,14 +96,7 @@ class RandomRotate(Transformer):
         self.decay = decay
         self.rotater = Rotate()
 
-    def update_param(self, verbose=False, *args, **kwargs):
-        if self.decay is not None:
-            self.r_max *= self.decay
-            self.r_min *= self.decay
-            if verbose:
-                print(f'Update {self.__class__.__name__} parameter to '
-                      f'{self.r_min}~{self.r_max}')
-
-    def __call__(self, inp, mask):
+    def __call__(self, inp: np.ndarray,
+                 mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         theta = np.random.rand() * (self.r_max - self.r_min) + self.r_min
         return self.rotater(inp, mask, theta)
