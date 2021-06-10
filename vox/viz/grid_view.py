@@ -1,23 +1,35 @@
+from typing import List, Optional, Tuple, Union
 import numpy as np
-from numpy.core.fromnumeric import size
 from .utils import tensor_to_numpy
 
 
-def grid_view(vox, layout, flatten_axis=-1, channel=0, margin=0):
+def grid_view(
+    vox: np.ndarray,
+    layout: Union[List[int], Tuple[int, int]],
+    flatten_axis: Optional[int]=-1,
+    channel: Optional[int]=0,
+    margin: Optional[int]=0
+) -> np.ndarray:
+
     assert isinstance(layout, (list, tuple)), \
-        f'Type error, layout should be a two element tuple, but {type(layout)} got.'
+        f'Type error, layout should be a two element tuple,'\
+        f' but {type(layout)} got.'
     assert isinstance(flatten_axis, int), \
-        f'Type error, flatten_axis should be a int, but {type(flatten_axis)} got.'
+        f'Type error, flatten_axis should be a int, '\
+        f'but {type(flatten_axis)} got.'
     assert isinstance(channel, int), \
-        f'Type error, channel should be a int,  but {type(channel)} got.'
+        f'Type error, channel should be a int, '\
+        f'but {type(channel)} got.'
     assert isinstance(margin, (int, tuple, list)), \
-        f'Type error, margin should be a int, list or tuple, but {type(channel)} got.'
+        f'Type error, margin should be a int, list or tuple, '\
+        f'but {type(channel)} got.'
 
     if isinstance(margin, int):
         margin = (margin, margin)
 
     vox = tensor_to_numpy(vox)
-    assert vox.ndim == 3 or vox.ndim == 4, f'please check vox dim. vox dim={vox.ndim}'
+    assert vox.ndim == 3 or vox.ndim == 4, \
+        f'please check vox dim. vox dim={vox.ndim}'
 
     if vox.ndim == 4:
         vox = vox[channel, :, :, :]
@@ -25,13 +37,21 @@ def grid_view(vox, layout, flatten_axis=-1, channel=0, margin=0):
     return make_grid(vox, layout, flatten_axis, margin)
 
 
-def grid_view_for_all_channel(vox, layout, flatten_axis=-1, ignore_channels=[0], margin=0):
+def grid_view_for_all_channel(
+    vox: np.ndarray,
+    layout: Union[List[int], Tuple[int, int]],
+    flatten_axis: Optional[int]=-1,
+    ignore_channels: Optional[List[int]]=[0],
+    margin: Optional[int]=0
+) -> np.ndarray:
+
     assert isinstance(ignore_channels, (int, tuple, list)), \
-        f'Type error, the type of ignore_channels should be one of int, tuple or list, ' + \
-        f'but {type(ignore_channels)} got.'
-    assert vox.ndim == 4, f'vox should have 4 dim (C, X, Y, Z), but vox.ndim={vox.ndim} got.'
+        f'Type error, the type of ignore_channels should be one of int, '\
+        f'tuple or list, but {type(ignore_channels)} got.'
+    assert vox.ndim == 4, \
+        f'vox should have 4 dim (C, X, Y, Z), but vox.ndim={vox.ndim} got.'
     assert isinstance(margin, (int, tuple, list)), \
-        'Type error, the type of margin should be one of int, tuple or list, ' + \
+        'Type error, the type of margin should be one of int, tuple or list, '\
         f'but {type(margin)} got.'
 
     if isinstance(margin, int):
@@ -46,11 +66,13 @@ def grid_view_for_all_channel(vox, layout, flatten_axis=-1, ignore_channels=[0],
         if i in ignore_channels:
             continue
 
-        sub_grid = grid_view(vox, layout, flatten_axis, channel=i, margin=margin)          
+        sub_grid = grid_view(
+            vox, layout, flatten_axis, channel=i, margin=margin)          
         if output is None:
             size_of_sub_grid = sub_grid.shape
-            output = np.zeros((num_show_channels * size_of_sub_grid[0] + margin[0] * 2,
-                               size_of_sub_grid[1] + margin[1] * 2))
+            output = np.zeros(
+                (num_show_channels * size_of_sub_grid[0] + margin[0] * 2,
+                 size_of_sub_grid[1] + margin[1] * 2))
 
         output[(k + 1) * margin[0] + k * size_of_sub_grid[0]: \
                 (k + 1) * margin[0] + (k + 1) * size_of_sub_grid[0],
@@ -61,7 +83,13 @@ def grid_view_for_all_channel(vox, layout, flatten_axis=-1, ignore_channels=[0],
     return output.astype(np.int)
 
 
-def make_grid(vox, layout, flatten_axis=-1, margin=0):
+def make_grid(
+    vox: np.ndarray,
+    layout: Union[List[int], Tuple[int, int]],
+    flatten_axis: Optional[int]=-1,
+    margin: Optional[int]=0
+) -> np.ndarray:
+
     """
     vox: A 3D numpy array
     """
@@ -71,7 +99,8 @@ def make_grid(vox, layout, flatten_axis=-1, margin=0):
         f'vox should be a 3D numpy array, but {vox.ndim}D array got.'
     if flatten_axis not in [0, 1, 2, -1, -2, -3]:
         raise ValueError(
-            f'flatten_axis should be 0, 1, 2, -1, -2 or -3, but {flatten_axis} got.')
+            f'flatten_axis should be 0, 1, 2, -1, -2 or -3, '
+            f'but {flatten_axis} got.')
     if isinstance(margin, int):
         margin = (margin, margin)
 

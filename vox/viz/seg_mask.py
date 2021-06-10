@@ -1,9 +1,17 @@
+from typing import List, Optional, Tuple, Union
 import numpy as np
 from vox.utils import one_hot, threhold_seg
 from .grid_view import grid_view_for_all_channel
 
 
-def seg_mask_cmp(seg_grid, mask_grid, show_class, one_hoted=True, num_classes=None):
+def seg_mask_cmp(
+    seg_grid: np.ndarray,
+    mask_grid: np.ndarray,
+    show_class: int,
+    one_hoted: Optional[bool]=True,
+    num_classes: Optional[int]=None
+) -> np.ndarray:
+
     assert one_hoted is True or num_classes is not None, \
         f'When one_hoted is False, num_classes should be specific.'
 
@@ -42,14 +50,18 @@ def seg_mask_cmp(seg_grid, mask_grid, show_class, one_hoted=True, num_classes=No
     return output.astype(np.int)
 
 
-def seg_mask_cmp_for_all_classes(vox_seg, vox_mask, layout,
-                                 ignore_class=[0],
-                                 flatten_axis=-1,
-                                 margin=0):
-    '''
-        vox_seg should be one_hoted
-        vox_mask should be one_hoted
-    '''
+def seg_mask_cmp_for_all_classes(
+    vox_seg: np.ndarray,
+    vox_mask: np.ndarray,
+    layout: Union[List[int], Tuple[int, int]],
+    ignore_class: Optional[List[int]]=[0],
+    flatten_axis: Optional[int]=-1,
+    margin: Optional[int]=0
+) -> np.ndarray:
+    """
+        :param vox_seg: should be one_hoted
+        :param vox_mask: should be one_hoted
+    """
 
     assert vox_mask.shape == vox_seg.shape, \
         f'vox_seg and vox_mask should have same shape, ' + \
