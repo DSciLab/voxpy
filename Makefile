@@ -3,14 +3,17 @@ PIP            := pip
 PYTHON         := python
 
 
-.PHONY: all dep install clean dist
+.PHONY: all dep install clean dist build
 
 
 all: dep install
 
 
-dist:
+dist: clean
 	$(PYTHON) setup.py sdist
+
+
+build: dist
 
 
 dep: $(REQUIREMENTS)
@@ -22,4 +25,4 @@ install: dep
 
 
 clean:
-	-rm -rf .eggs .tox build MANIFEST ./**/.ipynb_checkpoints
+	-rm -rf dist .eggs .tox build MANIFEST ./**/.ipynb_checkpoints
