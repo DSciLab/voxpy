@@ -39,7 +39,7 @@ class RicianNoise(NoiseBase):
         variance = random.uniform(noise_variance[0], noise_variance[1])
         inp = np.sqrt(
             (inp + np.random.normal(0.0, variance, size=inp.shape)) ** 2 +
-            np.random.normal(0.0, variance, size=inp.shape) ** 2)* np.sign(inp)
+            np.random.normal(0.0, variance, size=inp.shape) ** 2) * np.sign(inp)
         return inp
 
 
