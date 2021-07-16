@@ -34,7 +34,7 @@ class RicianNoise(NoiseBase):
     def augment_noise(
         self,
         inp: np.ndarray,
-        noise_variance: Tuple[float, float]=(0, 0.1)
+        noise_variance: Tuple[float, float]=(0, 0.07)
     ) -> np.ndarray:
         variance = random.uniform(noise_variance[0], noise_variance[1])
         inp = np.sqrt(
@@ -49,7 +49,7 @@ class GaussianNoise(NoiseBase):
     def augment_noise(
         self,
         inp: np.ndarray,
-        noise_variance: Tuple[float, float]=(0, 0.1)
+        noise_variance: Tuple[float, float]=(0, 0.07)
     ) -> np.ndarray:
         if noise_variance[0] == noise_variance[1]:
             variance = noise_variance[0]

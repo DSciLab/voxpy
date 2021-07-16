@@ -317,7 +317,7 @@ class RandAugment(Transformer):
             #   OP       minval      maxval
             (ContrastOp(opt), 0.0, 0.1),
 
-            (ConflictOp((GaussianBlurOp(opt), 0.0, 1.0),
+            (ConflictOp((GaussianBlurOp(opt), 0.0, 0.6),
                         (SharpOp(opt), None, None)),
                         None, None),
 
@@ -333,37 +333,37 @@ class RandAugment(Transformer):
         self.geometry_aug_ops = [
             #   OP       minval      maxval
             (IdentityOp(opt), None, None),
-            (ConflictOp((ResizeOp(opt), 1.0, 0.7),
-                        (ResizeOp(opt), 1.0, 1.3)),
-                        None, None),
+            # (ConflictOp((ResizeOp(opt), 1.0, 0.7),
+            #             (ResizeOp(opt), 1.0, 1.3)),
+            #             None, None),
 
-            (ConflictOp((TranslateXOp(opt), 0.0, 0.1),
-                        (TranslateXOp(opt), 0.0, -0.1),
-                        (TranslateYOp(opt), 0.0, 0.1),
-                        (TranslateYOp(opt), 0.0, -0.1)),
-                        None, None),
+            # (ConflictOp((TranslateXOp(opt), 0.0, 0.1),
+            #             (TranslateXOp(opt), 0.0, -0.1),
+            #             (TranslateYOp(opt), 0.0, 0.1),
+            #             (TranslateYOp(opt), 0.0, -0.1)),
+            #             None, None),
 
-            (ConflictOp((ShearXOp(opt), 0.0, 0.2),
-                        (ShearXOp(opt), 0.0, -0.2),
-                        (ShearYOp(opt), 0.0, 0.2),
-                        (ShearYOp(opt), 0.0, -0.2)),
-                        None, None),
+            # (ConflictOp((ShearXOp(opt), 0.0, 0.2),
+            #             (ShearXOp(opt), 0.0, -0.2),
+            #             (ShearYOp(opt), 0.0, 0.2),
+            #             (ShearYOp(opt), 0.0, -0.2)),
+            #             None, None),
 
-            (ConflictOp((SqueezeXOp(opt), 1.0, 0.8),
-                        (SqueezeXOp(opt), 1.0, 1.2),
-                        (SqueezeYOp(opt), 1.0, 0.8),
-                        (SqueezeYOp(opt), 1.0, 1.2)),
-                        None, None),
+            # (ConflictOp((SqueezeXOp(opt), 1.0, 0.8),
+            #             (SqueezeXOp(opt), 1.0, 1.2),
+            #             (SqueezeYOp(opt), 1.0, 0.8),
+            #             (SqueezeYOp(opt), 1.0, 1.2)),
+            #             None, None),
 
-            (ConflictOp((RotateOp(opt), 0.0, np.pi/8),
-                        (RotateOp(opt), 0.0, -np.pi/8)),
-                        None, None),
+            # (ConflictOp((RotateOp(opt), 0.0, np.pi/8),
+            #             (RotateOp(opt), 0.0, -np.pi/8)),
+            #             None, None),
 
             (FlipZOp(opt), None, None),
             (FlipYOp(opt), None, None),
             (FlipXOp(opt), None, None),
 
-            (Rotate90Op(opt), None, None)
+            # (Rotate90Op(opt), None, None)
         ]
 
     def __call__(self, inp: np.ndarray,

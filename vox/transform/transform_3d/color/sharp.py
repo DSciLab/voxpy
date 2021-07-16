@@ -23,7 +23,7 @@ class Sharpening(Transformer):
 
     def __init__(
         self,
-        strength: Union[float, Tuple[float, float]] = 0.2,
+        strength: Union[float, Tuple[float, float]] = 0.1,
     ):
         self.strength = strength
 

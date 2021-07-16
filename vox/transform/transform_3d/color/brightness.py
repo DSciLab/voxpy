@@ -23,7 +23,7 @@ class BrightnessAdditive(BrightnessBase):
         self,
         inp: np.ndarray,
         mu:float=0.0,
-        sigma:float=0.2,
+        sigma:float=0.16,
     ) -> np.ndarray:
         for c in range(inp.shape[0]):
             rnd_nb = np.random.normal(mu, sigma)
@@ -35,7 +35,7 @@ class BrightnessMultiplicative(BrightnessBase):
     def augment_brightness(
         self,
         inp: np.ndarray,
-        multiplier_range: Optional[Tuple[float, float]]=(0.5, 2),
+        multiplier_range: Optional[Tuple[float, float]]=(0.7, 1.5),
     ) -> np.ndarray:
 
         for c in range(inp.shape[0]):
