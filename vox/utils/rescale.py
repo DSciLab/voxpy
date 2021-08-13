@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 class Rescale(object):
@@ -21,8 +22,12 @@ class CentralNormRescale255(Rescale):
 
     def __call__(self, inp):
         inp = inp * self.std + self.mean
-        min_ = np.min(inp)
-        max_ = np.max(inp)
+        if isinstance(inp, np.ndarray):
+            min_ = np.min(inp)
+            max_ = np.max(inp)
+        else:
+            min_ = torch.min(inp)
+            max_ = torch.max(inp)
 
         inp = (inp - min_) / (max_ - min_)
 
