@@ -44,7 +44,9 @@ __all__ = [
     'ContrastOp',
     'AdditiveBrightnessOp',
     'MultiplicativeBrightnessOp',
-    'SharpOp'
+    'SharpOp',
+    'MedianFilterOp',
+    'GammaOp'
 ]
 
 
@@ -205,54 +207,15 @@ class ShearYOp(TransformerOp):
 #   Color transform Operation
 ##################################
 
-class GaussianBlurOp(TransformerOp):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__()
-        self.transformer = GaussianBlur()
-
-    def __call__(self, inp: np.ndarray, mask: np.ndarray,
-                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
-        return self.transformer(inp, mask, sigma=scale)
-
-
-class RicianNoiseOp(TransformerOp):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__()
-        self.transformer = RicianNoise()
-
-    def __call__(self, inp: np.ndarray, mask: np.ndarray,
-                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
-        return self.transformer(inp, mask)
-
-
-class GaussianNoiseOp(TransformerOp):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__()
-        self.transformer = GaussianNoise()
-
-    def __call__(self, inp: np.ndarray, mask: np.ndarray,
-                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
-        return self.transformer(inp, mask)
-
-
-class ContrastOp(TransformerOp):
-    def __init__(self, opt: Opts) -> None:
-        super().__init__()
-        self.transformer = Contrast()
-
-    def __call__(self, inp: np.ndarray, mask: np.ndarray,
-                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
-        return self.transformer(inp, mask)
-
-
-
 class AdditiveBrightnessOp(TransformerOp):
     def __init__(self, opt: Optional[Opts]=None) -> None:
         super().__init__()
         self.transformer = BrightnessAdditive()
 
-    def __call__(self, inp: np.ndarray, mask: np.ndarray,
-                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
+    def __call__(
+        self, inp: np.ndarray, mask: np.ndarray,
+        *args, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask)
 
 
@@ -261,20 +224,100 @@ class MultiplicativeBrightnessOp(TransformerOp):
         super().__init__()
         self.transformer = BrightnessMultiplicative()
 
-    def __call__(self, inp: np.ndarray, mask: np.ndarray,
-                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
+    def __call__(
+        self, inp: np.ndarray, mask: np.ndarray,
+        *args, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        return self.transformer(inp, mask)
+
+
+class ContrastOp(TransformerOp):
+    def __init__(self, opt: Optional[Opts]=None) -> None:
+        super().__init__()
+        self.transformer = Contrast()
+
+    def __call__(
+        self, inp: np.ndarray, mask: np.ndarray,
+        *args, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        return self.transformer(inp, mask)
+
+
+class GammaOp(TransformerOp):
+    def __init__(self, opt: Optional[Opts]=None) -> None:
+        super().__init__()
+        self.transformer = Gamma()
+    
+    def __call__(
+        self, inp: np.ndarray, mask: np.ndarray,
+        *args, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        return self.transformer(inp, mask)
+
+
+class GaussianBlurOp(TransformerOp):
+    def __init__(self, opt: Optional[Opts]=None) -> None:
+        super().__init__()
+        self.transformer = GaussianBlur()
+
+    def __call__(
+        self, inp: np.ndarray, mask: np.ndarray,
+        *args, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        return self.transformer(inp, mask)
+
+
+class MedianFilterOp(TransformerOp):
+    def __init__(self, opt: Optional[Opts]=None) -> None:
+        super().__init__()
+        self.transformer = MedianFilter()
+
+    def __call__(
+        self, inp: np.ndarray, mask: np.ndarray,
+        *args, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        return self.transformer(inp, mask)
+
+
+class RicianNoiseOp(TransformerOp):
+    def __init__(self, opt: Optional[Opts]=None) -> None:
+        super().__init__()
+        self.transformer = RicianNoise()
+
+    def __call__(
+        self, inp: np.ndarray, mask: np.ndarray,
+        *args, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        return self.transformer(inp, mask)
+
+
+class GaussianNoiseOp(TransformerOp):
+    def __init__(self, opt: Optional[Opts]=None) -> None:
+        super().__init__()
+        self.transformer = GaussianNoise()
+
+    def __call__(
+        self, inp: np.ndarray, mask: np.ndarray,
+        *args, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask)
 
 
 class SharpOp(TransformerOp):
-    def __init__(self, opt: Opts) -> None:
+    def __init__(self, opt: Optional[Opts]=None) -> None:
         super().__init__()
         self.transformer = Sharpening()
 
-    def __call__(self, inp: np.ndarray, mask: np.ndarray,
-                 scale: float) -> Tuple[np.ndarray, np.ndarray]:
+    def __call__(
+        self, inp: np.ndarray, mask: np.ndarray,
+        *args, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray]:
         return self.transformer(inp, mask)
 
+
+##################################
+#           Utils
+##################################
 
 class ConflictOp(TransformerOp):
     def __init__(self, *ops: TransformerOp) -> None:
@@ -315,9 +358,10 @@ class RandAugment(Transformer):
 
         self.color_aug_ops = [
             #   OP       minval      maxval
-            (ContrastOp(opt), 0.0, 0.1),
-
-            (ConflictOp((GaussianBlurOp(opt), 0.0, 0.6),
+            (ContrastOp(opt), None, None),
+            (GammaOp(opt), None, None),
+            (MedianFilterOp(opt), None, None),
+            (ConflictOp((GaussianBlurOp(opt), None, None),
                         (SharpOp(opt), None, None)),
                         None, None),
 
