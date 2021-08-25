@@ -71,7 +71,7 @@ def grid_view_for_all_channel(
         if output is None:
             size_of_sub_grid = sub_grid.shape
             output = np.zeros(
-                (num_show_channels * size_of_sub_grid[0] + margin[0] * 2,
+                (num_show_channels * size_of_sub_grid[0] + margin[0] * (num_show_channels + 1),
                  size_of_sub_grid[1] + margin[1] * 2))
 
         output[(k + 1) * margin[0] + k * size_of_sub_grid[0]: \
