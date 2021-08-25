@@ -358,6 +358,7 @@ class RandAugment(Transformer):
 
         self.color_aug_ops = [
             #   OP       minval      maxval
+            # (IdentityOp(opt), None, None),
             (ContrastOp(opt), None, None),
             (GammaOp(opt), None, None),
             (MedianFilterOp(opt), None, None),
