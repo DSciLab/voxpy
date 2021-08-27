@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.fromnumeric import size
 from scipy.ndimage import affine_transform
 from .._transform import Transformer
 
@@ -60,3 +61,14 @@ class RandomResize(Transformer):
     def __call__(self, inp, mask):
         scale = np.random.rand() * (self.r_max - self.r_min) + self.r_min
         return self.resizer(inp, mask, scale=scale)
+
+
+class ResizeTo(Transformer):
+    def __init__(self, size) -> None:
+        super().__init__()
+        assert isinstance(size, (tuple, list)) and len(size) == 2
+        self.size = size
+        self.resizer = Resize()
+
+    def __call__(self, inp, mask):
+        return self.resizer(inp, mask, size=self.size)
