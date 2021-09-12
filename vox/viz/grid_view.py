@@ -120,9 +120,9 @@ def make_grid(
     output = np.zeros((layout[0] * size[0] + margin[0] * (layout[0] + 1),\
                        layout[1] * size[1] + margin[1] * (layout[1] + 1)))
 
-    k = 0
     skip_frame = max(vox.shape[0] // num_sub_figure, 1)
 
+    k = 0
     for i in range(layout[0]):
         for j in range(layout[1]):
             output[i * size[0] + margin[0] * (i + 1): \
